@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSFI Diagnostic Intake Tool - Dr. Penny Yang</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* THE AESTHETIC ENGINE */
+        body {
+            font-family: 'Helvetica Neue', Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background-color: #f4f4f6;
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+            transition: background-color 0.3s;
+        }
+        .ipad-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            border-top: 6px solid #c08497;
+            position: relative; 
+        }
+
+        /* --- THE LANGUAGE TOGGLE ENGINE --- */
+        body.lang-en .zh { display: none !important; }
+        body.lang-zh .en { display: none !important; }
+        
+        .lang-switch-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f0e6e9;
+            border-radius: 20px;
+            display: flex;
+            overflow: hidden;
+            border: 1px solid #e2ccd2;
+        }
+        .lang-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 15px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-btn.active { background: #c08497; color: white; }
+
+        /* CLINIC LOGO & TITLE HEADER */
+        .clinical-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #f0e6e9;
+            margin-top: 20px;
+        }
+        .logo-link { display: inline-block; margin-bottom: 20px; }
+        .logo-image { max-height: 120px; width: auto; transition: transform 0.2s ease; }
+        .logo-link:hover .logo-image { transform: scale(1.03); }
+        .clinic-sub { color: #888; font-size: 14px; margin-bottom: 10px; }
+        .doctor-info {
+            background-color: #fdfafb;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #f0e6e9;
+            display: inline-block;
+        }
+        .doctor-name-en { font-size: 20px; color: #a76b7e; font-weight: 300; margin-bottom: 3px; }
+        .doctor-name-zh { font-size: 16px; color: #c08497; }
+        .dept-info { font-size: 13px; color: #888; margin-top: 8px; }
+
+        h1, h2, h3 { color: #c08497; text-align: center; font-weight: 300; }
+        h1 { font-size: 22px; margin-bottom: 5px; line-height: 1.4;}
+        .subtitle { text-align: center; color: #888; margin-bottom: 40px; font-size: 13px; }
+        
+        .domain-section {
+            background: #fdfafb;
+            border: 1px solid #f0e6e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .domain-title {
+            font-size: 18px;
+            color: #a76b7e;
+            border-bottom: 1px solid #f0e6e9;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .question-block { margin-bottom: 25px; }
+        p.q-text { margin: 0 0 12px 0; font-weight: 500; font-size: 15px; color: #444; line-height: 1.5;}
+        
+        label.radio-block {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 5px 0;
+            transition: color 0.2s ease;
+        }
+        label.radio-block:hover { color: #c08497; }
+        .simple-radio { margin-right: 12px; display: inline-block !important; width: 18px; height: 18px;}
+
+        button.calc-btn {
+            width: 100%;
+            background-color: #c08497;
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(192, 132, 151, 0.3);
+        }
+        button.calc-btn:hover { background-color: #a76b7e; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(192, 132, 151, 0.4);}
+        
+        #results-dashboard { display: none; margin-top: 40px; padding-top: 40px; border-top: 2px dashed #ddd; }
+        .score-display { text-align: center; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .score-safe { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9;}
+        .score-risk { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2;}
+        .total-number { font-size: 38px; font-weight: bold; margin: 12px 0;}
+        .clinical-interpretation { line-height: 1.5; }
+        
+        .chart-container { position: relative; height: 500px; width: 100%; margin-bottom: 30px;}
+
+        button.print-btn {
+            width: 100%; background-color: #6c757d; color: white; border: none; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; margin-bottom: 15px;
+        }
+        button.print-btn:hover { background-color: #5a6268; }
+
+        button.edit-btn {
+            width: 100%; background-color: transparent; color: #c08497; border: 2px solid #c08497; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
+        }
+        button.edit-btn:hover { background-color: #fffafb; }
+    </style>
+</head>
+<body class="lang-en">
+
+    <div class="ipad-container">
+        
+        <div class="lang-switch-container">
+            <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+            <button class="lang-btn" id="btn-zh" onclick="setLang('zh')">繁體中文</button>
+        </div>
+
+        <div class="clinical-header">
+            <a href="https://www.taipei-arts-plastic-clinic.com/team_detail.asp?id=920" target="_blank" class="logo-link">
+                <img src="arts.clinic.logo.05.png" alt="Taipei Arts Plastic Clinic" class="logo-image">
+            </a>
+            <div class="clinic-sub">
+                <span class="en">Clinical Diagnostic Tool | Taipei Arts Plastic Clinic</span>
+                <span class="zh">臨床診斷工具 | Taipei Arts Plastic Clinic</span>
+            </div>
+            <div class="doctor-info">
+                <div class="doctor-name-en">Dr. Penny Yang</div>
+                <div class="doctor-name-zh">楊佩珊醫師</div>
+                <div class="dept-info">台北亞緻整形外科醫美中心 醫學美容泌尿外科專科</div>
+            </div>
+        </div>
+
+        <h1>
+            <span class="en">FEMALE SEXUAL FUNCTION INDEX (FSFI)</span>
+            <span class="zh">女性性功能指數 (FSFI) 評估量表</span>
+        </h1>
+        <div class="subtitle">
+            <span class="en">Confidential Patient Diagnostic Intake</span>
+            <span class="zh">機密病患診斷問卷</span>
+        </div>
+        
+        <form id="fsfi-form">
+            
+            <div class="domain-section">
+                <div class="domain-title">
+                    <span class="en">Module 1: Desire & Interest</span>
+                    <span class="zh">第一部分：性慾望與性興趣</span>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">1. Over the past 4 weeks, how often did you feel sexual desire or interest?</span>
+                        <span class="zh">1. 過去四週內，您有多常感到性慾望或性興趣？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q1" value="1">
+                        <span class="en">Almost never or never</span><span class="zh">幾乎沒有或完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q1" value="2">
+                        <span class="en">A few times</span><span class="zh">偶爾幾次</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q1" value="3">
+                        <span class="en">Sometimes</span><span class="zh">有時</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q1" value="4">
+                        <span class="en">Most times</span><span class="zh">大部分時候</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q1" value="5">
+                        <span class="en">Almost always or always</span><span class="zh">幾乎總是或總是</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">2. Over the past 4 weeks, how would you rate your level of sexual desire or interest?</span>
+                        <span class="zh">2. 過去四週內，您如何評估您的性慾望或性興趣程度？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q2" value="1">
+                        <span class="en">Very low or none at all</span><span class="zh">非常低或完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q2" value="2">
+                        <span class="en">Low</span><span class="zh">低</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q2" value="3">
+                        <span class="en">Moderate</span><span class="zh">中等</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q2" value="4">
+                        <span class="en">High</span><span class="zh">高</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q2" value="5">
+                        <span class="en">Very high</span><span class="zh">非常高</span></label>
+                </div>
+            </div>
+
+            <div class="domain-section">
+                <div class="domain-title">
+                    <span class="en">Module 2: Arousal</span>
+                    <span class="zh">第二部分：性喚起（性興奮）</span>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">3. Over the past 4 weeks, how often did you feel sexually aroused during sexual activity?</span>
+                        <span class="zh">3. 過去四週內，在性活動中您有多常感到性喚起（性興奮）？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q3" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q3" value="1">
+                        <span class="en">Almost never or never</span><span class="zh">幾乎沒有或完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q3" value="2">
+                        <span class="en">A few times</span><span class="zh">偶爾幾次</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q3" value="3">
+                        <span class="en">Sometimes</span><span class="zh">有時</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q3" value="4">
+                        <span class="en">Most times</span><span class="zh">大部分時候</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q3" value="5">
+                        <span class="en">Almost always or always</span><span class="zh">幾乎總是或總是</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">4. Over the past 4 weeks, how would you rate your level of sexual arousal during sexual activity?</span>
+                        <span class="zh">4. 過去四週內，您如何評估您在性活動中的性喚起程度？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q4" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q4" value="1">
+                        <span class="en">Very low or none at all</span><span class="zh">非常低或完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q4" value="2">
+                        <span class="en">Low</span><span class="zh">低</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q4" value="3">
+                        <span class="en">Moderate</span><span class="zh">中等</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q4" value="4">
+                        <span class="en">High</span><span class="zh">高</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q4" value="5">
+                        <span class="en">Very high</span><span class="zh">非常高</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">5. Over the past 4 weeks, how confident were you about becoming sexually aroused?</span>
+                        <span class="zh">5. 過去四週內，您對於能夠產生性喚起有多大的自信？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q5" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q5" value="1">
+                        <span class="en">Very low or no confidence</span><span class="zh">非常低或完全沒有自信</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q5" value="2">
+                        <span class="en">Low confidence</span><span class="zh">自信低</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q5" value="3">
+                        <span class="en">Moderate confidence</span><span class="zh">自信中等</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q5" value="4">
+                        <span class="en">High confidence</span><span class="zh">自信高</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q5" value="5">
+                        <span class="en">Very high confidence</span><span class="zh">自信非常高</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">6. Over the past 4 weeks, how often have you been satisfied with your arousal?</span>
+                        <span class="zh">6. 過去四週內，您有多常對自己的性喚起感到滿意？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q6" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q6" value="1">
+                        <span class="en">Almost never or never</span><span class="zh">幾乎沒有或完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q6" value="2">
+                        <span class="en">A few times</span><span class="zh">偶爾幾次</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q6" value="3">
+                        <span class="en">Sometimes</span><span class="zh">有時</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q6" value="4">
+                        <span class="en">Most times</span><span class="zh">大部分時候</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q6" value="5">
+                        <span class="en">Almost always or always</span><span class="zh">幾乎總是或總是</span></label>
+                </div>
+            </div>
+
+            <div class="domain-section">
+                <div class="domain-title">
+                    <span class="en">Module 3: Lubrication</span>
+                    <span class="zh">第三部分：陰道濕潤</span>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">7. Over the past 4 weeks, how often did you become lubricated ("wet") during sexual activity?</span>
+                        <span class="zh">7. 過去四週內，在性活動中您有多常產生陰道濕潤？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q7" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q7" value="1">
+                        <span class="en">Almost never or never</span><span class="zh">幾乎沒有或完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q7" value="2">
+                        <span class="en">A few times</span><span class="zh">偶爾幾次</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q7" value="3">
+                        <span class="en">Sometimes</span><span class="zh">有時</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q7" value="4">
+                        <span class="en">Most times</span><span class="zh">大部分時候</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q7" value="5">
+                        <span class="en">Almost always or always</span><span class="zh">幾乎總是或總是</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">8. Over the past 4 weeks, how difficult was it to become lubricated?</span>
+                        <span class="zh">8. 過去四週內，產生陰道濕潤有多困難？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q8" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q8" value="1">
+                        <span class="en">Extremely difficult or impossible</span><span class="zh">極度困難或不可能</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q8" value="2">
+                        <span class="en">Very difficult</span><span class="zh">非常困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q8" value="3">
+                        <span class="en">Difficult</span><span class="zh">困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q8" value="4">
+                        <span class="en">Slightly difficult</span><span class="zh">有點困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q8" value="5">
+                        <span class="en">Not difficult</span><span class="zh">不困難</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">9. Over the past 4 weeks, how often did you maintain your lubrication until completion?</span>
+                        <span class="zh">9. 過去四週內，您有多常能維持陰道濕潤直到性活動結束？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q9" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q9" value="1">
+                        <span class="en">Almost never or never</span><span class="zh">幾乎沒有或完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q9" value="2">
+                        <span class="en">A few times</span><span class="zh">偶爾幾次</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q9" value="3">
+                        <span class="en">Sometimes</span><span class="zh">有時</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q9" value="4">
+                        <span class="en">Most times</span><span class="zh">大部分時候</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q9" value="5">
+                        <span class="en">Almost always or always</span><span class="zh">幾乎總是或總是</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">10. Over the past 4 weeks, how difficult was it to maintain your lubrication?</span>
+                        <span class="zh">10. 過去四週內，維持陰道濕潤有多困難？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q10" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q10" value="1">
+                        <span class="en">Extremely difficult or impossible</span><span class="zh">極度困難或不可能</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q10" value="2">
+                        <span class="en">Very difficult</span><span class="zh">非常困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q10" value="3">
+                        <span class="en">Difficult</span><span class="zh">困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q10" value="4">
+                        <span class="en">Slightly difficult</span><span class="zh">有點困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q10" value="5">
+                        <span class="en">Not difficult</span><span class="zh">不困難</span></label>
+                </div>
+            </div>
+
+            <div class="domain-section">
+                <div class="domain-title">
+                    <span class="en">Module 4: Orgasm</span>
+                    <span class="zh">第四部分：性高潮</span>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">11. Over the past 4 weeks, how often did you reach orgasm?</span>
+                        <span class="zh">11. 過去四週內，在性刺激或性交時，您有多常達到性高潮？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q11" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q11" value="1">
+                        <span class="en">Almost never or never</span><span class="zh">幾乎沒有或完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q11" value="2">
+                        <span class="en">A few times</span><span class="zh">偶爾幾次</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q11" value="3">
+                        <span class="en">Sometimes</span><span class="zh">有時</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q11" value="4">
+                        <span class="en">Most times</span><span class="zh">大部分時候</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q11" value="5">
+                        <span class="en">Almost always or always</span><span class="zh">幾乎總是或總是</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">12. Over the past 4 weeks, how difficult was it for you to reach orgasm?</span>
+                        <span class="zh">12. 過去四週內，在性刺激或性交時，達到性高潮有多困難？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q12" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q12" value="1">
+                        <span class="en">Extremely difficult or impossible</span><span class="zh">極度困難或不可能</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q12" value="2">
+                        <span class="en">Very difficult</span><span class="zh">非常困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q12" value="3">
+                        <span class="en">Difficult</span><span class="zh">困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q12" value="4">
+                        <span class="en">Slightly difficult</span><span class="zh">有點困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q12" value="5">
+                        <span class="en">Not difficult</span><span class="zh">不困難</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">13. Over the past 4 weeks, how satisfied were you with your ability to reach orgasm?</span>
+                        <span class="zh">13. 過去四週內，您對自己達到性高潮的能力有多滿意？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q13" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q13" value="1">
+                        <span class="en">Very dissatisfied</span><span class="zh">非常不滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q13" value="2">
+                        <span class="en">Moderately dissatisfied</span><span class="zh">中度不滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q13" value="3">
+                        <span class="en">About equally satisfied</span><span class="zh">滿意與不滿意各半</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q13" value="4">
+                        <span class="en">Moderately satisfied</span><span class="zh">中度滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q13" value="5">
+                        <span class="en">Very satisfied</span><span class="zh">非常滿意</span></label>
+                </div>
+            </div>
+
+            <div class="domain-section">
+                <div class="domain-title">
+                    <span class="en">Module 5: Satisfaction</span>
+                    <span class="zh">第五部分：性滿意度</span>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">14. Over the past 4 weeks, how satisfied have you been with your emotional closeness?</span>
+                        <span class="zh">14. 過去四週內，您對與伴侶在性活動中的情感親密程度有多滿意？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q14" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q14" value="1">
+                        <span class="en">Very dissatisfied</span><span class="zh">非常不滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q14" value="2">
+                        <span class="en">Moderately dissatisfied</span><span class="zh">中度不滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q14" value="3">
+                        <span class="en">About equally satisfied</span><span class="zh">滿意與不滿意各半</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q14" value="4">
+                        <span class="en">Moderately satisfied</span><span class="zh">中度滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q14" value="5">
+                        <span class="en">Very satisfied</span><span class="zh">非常滿意</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">15. Over the past 4 weeks, how satisfied have you been with your sexual relationship?</span>
+                        <span class="zh">15. 過去四週內，您對與伴侶的性關係有多滿意？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q15" value="1">
+                        <span class="en">Very dissatisfied</span><span class="zh">非常不滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q15" value="2">
+                        <span class="en">Moderately dissatisfied</span><span class="zh">中度不滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q15" value="3">
+                        <span class="en">About equally satisfied</span><span class="zh">滿意與不滿意各半</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q15" value="4">
+                        <span class="en">Moderately satisfied</span><span class="zh">中度滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q15" value="5">
+                        <span class="en">Very satisfied</span><span class="zh">非常滿意</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">16. Over the past 4 weeks, how satisfied have you been with your overall sexual life?</span>
+                        <span class="zh">16. 過去四週內，您對整體的性生活有多滿意？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q16" value="1">
+                        <span class="en">Very dissatisfied</span><span class="zh">非常不滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q16" value="2">
+                        <span class="en">Moderately dissatisfied</span><span class="zh">中度不滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q16" value="3">
+                        <span class="en">About equally satisfied</span><span class="zh">滿意與不滿意各半</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q16" value="4">
+                        <span class="en">Moderately satisfied</span><span class="zh">中度滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q16" value="5">
+                        <span class="en">Very satisfied</span><span class="zh">非常滿意</span></label>
+                </div>
+            </div>
+
+            <div class="domain-section">
+                <div class="domain-title">
+                    <span class="en">Module 6: Pain & Discomfort</span>
+                    <span class="zh">第六部分：疼痛與不適</span>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">17. Over the past 4 weeks, how often did you experience pain during vaginal penetration?</span>
+                        <span class="zh">17. 過去四週內，您在陰道插入時有多常感到疼痛或不適？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q17" value="0">
+                        <span class="en">Did not attempt intercourse</span><span class="zh">未嘗試性交</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q17" value="5">
+                        <span class="en">Almost never or never</span><span class="zh">幾乎沒有或完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q17" value="4">
+                        <span class="en">A few times</span><span class="zh">偶爾幾次</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q17" value="3">
+                        <span class="en">Sometimes</span><span class="zh">有時</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q17" value="2">
+                        <span class="en">Most times</span><span class="zh">大部分時候</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q17" value="1">
+                        <span class="en">Almost always or always</span><span class="zh">幾乎總是或總是</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">18. Over the past 4 weeks, how often did you experience pain following vaginal penetration?</span>
+                        <span class="zh">18. 過去四週內，您在陰道插入後有多常感到疼痛或不適？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q18" value="0">
+                        <span class="en">Did not attempt intercourse</span><span class="zh">未嘗試性交</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q18" value="5">
+                        <span class="en">Almost never or never</span><span class="zh">幾乎沒有或完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q18" value="4">
+                        <span class="en">A few times</span><span class="zh">偶爾幾次</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q18" value="3">
+                        <span class="en">Sometimes</span><span class="zh">有時</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q18" value="2">
+                        <span class="en">Most times</span><span class="zh">大部分時候</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q18" value="1">
+                        <span class="en">Almost always or always</span><span class="zh">幾乎總是或總是</span></label>
+                </div>
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">19. Over the past 4 weeks, how would you rate your level of pain?</span>
+                        <span class="zh">19. 過去四週內，您如何評估在陰道插入時或插入後的疼痛或不適程度？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q19" value="0">
+                        <span class="en">Did not attempt intercourse</span><span class="zh">未嘗試性交</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q19" value="5">
+                        <span class="en">Very low or none at all</span><span class="zh">非常低或完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q19" value="4">
+                        <span class="en">Low</span><span class="zh">低</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q19" value="3">
+                        <span class="en">Moderate</span><span class="zh">中等</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q19" value="2">
+                        <span class="en">High</span><span class="zh">高</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="q19" value="1">
+                        <span class="en">Very high</span><span class="zh">非常高</span></label>
+                </div>
+            </div>
+
+            <button type="button" class="calc-btn" onclick="executeClinicalLogic()">
+                <span class="en">Calculate Diagnostics & Generate Radar Graph</span>
+                <span class="zh">計算診斷結果並生成雷達圖</span>
+            </button>
+        </form>
+
+        <div id="results-dashboard">
+            <h3>
+                <span class="en">DIAGNOSTIC RESULTS Dashboard</span>
+                <span class="zh">診斷結果儀表板</span>
+            </h3>
+            <div id="score-card" class="score-display">
+                <div>
+                    <span class="en">Total FSFI Score:</span>
+                    <span class="zh">FSFI 總分：</span>
+                </div>
+                <div class="total-number" id="total-score-display">0.0</div>
+                <div id="clinical-interpretation" class="clinical-interpretation">Awaiting calculation...</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="radarChart"></canvas>
+            </div>
+            <button type="button" class="print-btn" onclick="printReport()">
+                <span class="en">Export Clinical Report (PDF/Print)</span>
+                <span class="zh">匯出臨床報告 (PDF/列印)</span>
+            </button>
+
+            <button type="button" class="edit-btn" onclick="editAnswers()">
+                <span class="en">Go Back / Edit Answers</span>
+                <span class="zh">返回修改答案</span>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        let clinicalChart; 
+        
+        function setLang(lang) {
+            document.body.className = 'lang-' + lang;
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+            
+            if (document.getElementById('results-dashboard').style.display === 'block') {
+                executeClinicalLogic(true); 
+            }
+        }
+
+        function executeClinicalLogic(isRedraw = false) {
+            const questions = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12','q13','q14','q15','q16','q17','q18','q19'];
+            let vals = {};
+            let missing = [];
+
+            questions.forEach(q => {
+                let selected = document.querySelector(`input[name="${q}"]:checked`);
+                if (selected) { vals[q] = parseInt(selected.value); } 
+                else { missing.push(q.replace('q', '')); }
+            });
+
+            const isZh = document.body.classList.contains('lang-zh');
+
+            if (missing.length > 0) {
+                if (!isRedraw) {
+                    let msg = isZh ? `臨床提示：在計算前，請回答以下問題：${missing.join(', ')}` : `Clinical Alert: Please answer the following questions before calculating: ${missing.join(', ')}`;
+                    alert(msg);
+                }
+                return;
+            }
+
+            let desireScore = (vals.q1 + vals.q2) * 0.6;
+            let arousalScore = (vals.q3 + vals.q4 + vals.q5 + vals.q6) * 0.3;
+            let lubricationScore = (vals.q7 + vals.q8 + vals.q9 + vals.q10) * 0.3;
+            let orgasmScore = (vals.q11 + vals.q12 + vals.q13) * 0.4;
+            let satisfactionScore = (vals.q14 + vals.q15 + vals.q16) * 0.4;
+            let painScore = (vals.q17 + vals.q18 + vals.q19) * 0.4;
+
+            let totalScoreRaw = desireScore + arousalScore + lubricationScore + orgasmScore + satisfactionScore + painScore;
+            let totalScoreFormatted = (Math.round(totalScoreRaw * 10) / 10).toFixed(1);
+
+            document.getElementById('fsfi-form').style.display = 'none'; 
+            document.getElementById('results-dashboard').style.display = 'block';
+            document.getElementById('total-score-display').innerText = totalScoreFormatted;
+            
+            let scoreCard = document.getElementById('score-card');
+            let interpretationText = document.getElementById('clinical-interpretation');
+            
+            if (totalScoreRaw <= 26.55) {
+                scoreCard.className = 'score-display score-risk';
+                interpretationText.innerHTML = isZh 
+                    ? "<strong>臨床警示：</strong> 得分 ≤ 26.55。<br>結果顯示有女性性功能障礙 (FSD) 的臨床風險。" 
+                    : "<strong>Clinical Flag:</strong> Score ≤ 26.55.<br>Result indicates clinical risk for Female Sexual Dysfunction (FSD).";
+            } else {
+                scoreCard.className = 'score-display score-safe';
+                interpretationText.innerHTML = isZh 
+                    ? "<strong>臨床狀態：</strong> 得分 > 26.55。<br>結果在標準功能參數內。FSD 風險低。" 
+                    : "<strong>Clinical Status:</strong> Score > 26.55.<br>Result within standard functional parameters. FSD risk is low.";
+            }
+
+            const chartLabels = isZh 
+                ? ['性慾望', '性喚起', '陰道濕潤', '性高潮', '性滿意度', '疼痛'] 
+                : ['Desire', 'Arousal', 'Lubrication', 'Orgasm', 'Satisfaction', 'Pain'];
+
+            const chartData = {
+                labels: chartLabels,
+                datasets: [{
+                    label: isZh ? '病患領域得分' : 'Patient Domain Scores',
+                    data: [desireScore, arousalScore, lubricationScore, orgasmScore, satisfactionScore, painScore], 
+                    fill: true,
+                    backgroundColor: 'rgba(192, 132, 151, 0.2)',
+                    borderColor: 'rgba(192, 132, 151, 1)',      
+                    pointBackgroundColor: 'rgba(192, 132, 151, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(192, 132, 151, 1)',
+                    pointRadius: 4
+                }]
+            };
+
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            if (clinicalChart) { clinicalChart.destroy(); } 
+            
+            clinicalChart = new Chart(ctx, {
+                type: 'radar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 6, 
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            pointLabels: { font: { size: 14, family: 'Helvetica Neue', weight: 'bold' }, color: '#555' },
+                            ticks: { stepSize: 1, display: true, color: '#999', backdropColor: 'transparent' } 
+                        }
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: function(context) { return context.raw.toFixed(1); } } }
+                    }
+                }
+            });
+            
+            if(!isRedraw) window.scrollTo({ top: 0, behavior: 'smooth' }); 
+        }
+
+        function editAnswers() {
+            document.getElementById('results-dashboard').style.display = 'none';
+            document.getElementById('fsfi-form').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function printReport() {
+            if (!clinicalChart) {
+                const isZh = document.body.classList.contains('lang-zh');
+                alert(isZh ? "臨床提示：請在匯出前計算結果。" : "Clinical Alert: Please calculate the results before exporting.");
+                return;
+            }
+
+            const isZh = document.body.classList.contains('lang-zh');
+            const scoreNum = document.getElementById('total-score-display').innerText;
+            const interpretationHTML = document.getElementById('clinical-interpretation').innerHTML;
+            const chartImageBase64 = clinicalChart.toBase64Image(); 
+            
+            const now = new Date();
+            const timestamp = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+
+            const txtTitle = isZh ? "FSFI 病患診斷報告" : "FSFI Patient Diagnostic Report";
+            const txtScore = isZh ? "FSFI 總分" : "Total FSFI Score";
+            const txtChart = isZh ? "各領域得分視覺分析圖" : "Domain Score Visual Representation";
+            const txtFooter = isZh ? "機密臨床資料" : "CONFIDENTIAL CLINICAL DATA";
+
+            const printView = window.open('', '_blank');
+            printView.document.write(`
+<html>
+<head>
+    <title>FSFI Report - ${timestamp}</title>
+    <style>
+        @page { size: A4 portrait; margin: 20mm; }
+        body { font-family: 'Helvetica Neue', Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif; color: #333; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact;}
+        .print-container { width: 100%; max-width: 170mm; margin: 0 auto; padding-top: 10mm; }
+        .print-header { text-align: center; margin-bottom: 20mm; border-bottom: 2px solid #f0e6e9; padding-bottom: 10mm;}
+        .print-logo { max-height: 25mm; width: auto; margin-bottom: 5mm;}
+        .print-clinic-title { font-size: 14pt; color: #a76b7e; margin-bottom: 2mm;}
+        .print-doctor-info { font-size: 11pt; color: #555;}
+        h1 { font-size: 16pt; color: #c08497; text-align: center; margin-bottom: 10mm; font-weight: 300; letter-spacing: 1px;}
+        h2 { font-size: 12pt; color: #a76b7e; margin-top: 15mm; margin-bottom: 5mm;}
+        .print-score-display { text-align: center; margin-bottom: 15mm; padding: 10mm; border-radius: 8px; border: 1px solid #ddd;}
+        .score-safe { background-color: #e8f5e9 !important; border-color: #c8e6c9 !important;}
+        .score-risk { background-color: #ffebee !important; border-color: #ffcdd2 !important;}
+        .total-number { font-size: 48pt; font-weight: bold; margin: 5mm 0; color: #333;}
+        .clinical-interpretation { font-size: 11pt; color: #555; line-height: 1.5;}
+        .clinical-interpretation strong { color: #333;}
+        .print-chart-img { width: 100%; height: auto; max-height: 120mm; object-fit: contain; margin-top: 5mm;}
+        .print-footer { margin-top: 30mm; border-top: 1px solid #ddd; padding-top: 5mm; font-size: 9pt; color: #888; text-align: right;}
+        .print-instruction { position: fixed; bottom: 10px; left: 10px; background: #333; color: white; padding: 5px 10px; border-radius: 4px; font-size: 10pt; z-index: 1000;}
+        @media print { .print-instruction { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="print-instruction">${isZh ? '正在產生列印預覽... (完成後請關閉此分頁)' : 'Generating print preview... (Please close this tab when finished)'}</div>
+    
+    <div class="print-container">
+        <div class="print-header">
+            <img src="arts.clinic.logo.05.png" class="print-logo" alt="Logo">
+            <div class="print-clinic-title">Taipei Arts Plastic Clinic</div>
+            <div class="print-doctor-info">Dr. Penny Yang | 楊佩珊醫師</div>
+            <div class="print-doctor-info">台北亞緻整形外科醫美中心 醫學美容泌尿外科專科</div>
+        </div>
+
+        <h1>${txtTitle}</h1>
+        
+        <div class="print-score-display ${parseFloat(scoreNum) <= 26.55 ? 'score-risk' : 'score-safe'}">
+            <div style="font-size: 12pt;">${txtScore}</div>
+            <div class="total-number">${scoreNum}</div>
+            <div class="clinical-interpretation">${interpretationHTML}</div>
+        </div>
+        
+        <h2>${txtChart}</h2>
+        <img src="${chartImageBase64}" class="print-chart-img" alt="Radar Graph">
+
+        <div class="print-footer">
+            Generated: ${timestamp}<br>
+            ${txtFooter} | Taipei Arts Plastic Clinic - Dr. Penny Yang
+        </div>
+    </div>
+
+    <script>
+        const logo = document.querySelector('.print-logo');
+        if (logo.complete) { handlePrint(); } else { logo.onload = handlePrint; logo.onerror = handlePrint; }
+
+        function handlePrint() {
+            setTimeout(() => {
+                window.print();
+                document.querySelector('.print-instruction').innerText = "${isZh ? '報告已生成，您可以關閉此分頁。' : 'Report generated. You may close this tab.'}";
+            }, 500); 
+        }
+    <\\/script>
+</body>
+</html>
+            `);
+            printView.document.close(); 
+        }
+    </script>
+</body>
+</html>
