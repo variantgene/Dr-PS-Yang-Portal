@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Diagnostics Portal - Dr. Penny Yang</title>
+    
+    <style>
+        /* THE AESTHETIC ENGINE (Portal Edition) */
+        body {
+            font-family: 'Helvetica Neue', Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background-color: #f4f4f6;
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        .ipad-container {
+            width: 100%;
+            max-width: 650px;
+            background: #ffffff;
+            padding: 50px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            border-top: 6px solid #c08497;
+            position: relative; 
+            text-align: center;
+        }
+
+        /* --- THE LANGUAGE TOGGLE ENGINE --- */
+        body.lang-en .zh { display: none !important; }
+        body.lang-zh .en { display: none !important; }
+        
+        .lang-switch-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f0e6e9;
+            border-radius: 20px;
+            display: flex;
+            overflow: hidden;
+            border: 1px solid #e2ccd2;
+        }
+        .lang-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 15px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-btn.active { background: #c08497; color: white; }
+
+        /* CLINIC LOGO & TITLE HEADER */
+        .clinical-header {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #f0e6e9;
+            margin-top: 20px;
+        }
+        .logo-image { max-height: 110px; width: auto; margin-bottom: 20px;}
+        .doctor-info {
+            background-color: #fdfafb;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #f0e6e9;
+            display: inline-block;
+        }
+        .doctor-name-en { font-size: 20px; color: #a76b7e; font-weight: 300; margin-bottom: 3px; }
+        .doctor-name-zh { font-size: 16px; color: #c08497; }
+        .dept-info { font-size: 13px; color: #888; margin-top: 8px; }
+
+        h1 { color: #c08497; font-weight: 300; font-size: 24px; margin-bottom: 10px; line-height: 1.4;}
+        .subtitle { color: #888; margin-bottom: 40px; font-size: 14px; }
+
+        /* --- THE PORTAL MENU BUTTONS --- */
+        .menu-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .menu-btn {
+            display: block;
+            text-decoration: none;
+            background: #fdfafb;
+            border: 1px solid #f0e6e9;
+            padding: 25px;
+            border-radius: 8px;
+            color: #a76b7e;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            cursor: pointer;
+        }
+        
+        .menu-btn:hover {
+            background: #c08497;
+            color: #ffffff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(192, 132, 151, 0.3);
+            border-color: #c08497;
+        }
+
+        .btn-subtext {
+            display: block;
+            font-size: 13px;
+            font-weight: normal;
+            margin-top: 8px;
+            opacity: 0.8;
+        }
+
+        /* "Coming Soon" styling */
+        .menu-btn.disabled {
+            background: #f9f9f9;
+            border-color: #eee;
+            color: #aaa;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .menu-btn.disabled:hover {
+            background: #f9f9f9;
+            color: #aaa;
+            border-color: #eee;
+        }
+        .badge {
+            display: inline-block;
+            background: #e0e0e0;
+            color: #888;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="lang-en"> <div class="ipad-container">
+        
+        <div class="lang-switch-container">
+            <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+            <button class="lang-btn" id="btn-zh" onclick="setLang('zh')">繁體中文</button>
+        </div>
+
+        <div class="clinical-header">
+            <img src="arts.clinic.logo.05.png" alt="Taipei Arts Plastic Clinic" class="logo-image">
+            <br>
+            <div class="doctor-info">
+                <div class="doctor-name-en">Dr. Penny Yang</div>
+                <div class="doctor-name-zh">楊佩珊醫師</div>
+                <div class="dept-info">台北亞緻整形外科醫美中心 | 醫學美容泌尿外科專科</div>
+            </div>
+        </div>
+
+        <h1>
+            <span class="en">Clinical Diagnostics Portal</span>
+            <span class="zh">臨床診斷入口網站</span>
+        </h1>
+        <div class="subtitle">
+            <span class="en">Please select the appropriate assessment below.</span>
+            <span class="zh">請選擇下方適合的評估量表。</span>
+        </div>
+        
+        <div class="menu-grid">
+            
+            <a href="fsfi-dr-yang.html" class="menu-btn">
+                <span class="en">Female Sexual Function Index (FSFI)</span>
+                <span class="zh">女性性功能指數 (FSFI) 評估量表</span>
+                <span class="btn-subtext">
+                    <span class="en">19-Question Diagnostic Assessment</span>
+                    <span class="zh">19題臨床診斷問卷</span>
+                </span>
+            </a>
+
+            <div class="menu-btn disabled">
+                <span class="en">Male Sexual Function Index (IIEF) <span class="badge">Coming Soon</span></span>
+                <span class="zh">男性性功能指數 (IIEF) 評估量表 <span class="badge">即將推出</span></span>
+                <span class="btn-subtext">
+                    <span class="en">In Development</span>
+                    <span class="zh">開發中</span>
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // Language Toggle Logic for the Menu
+        function setLang(lang) {
+            document.body.className = 'lang-' + lang;
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+        }
+    </script>
+</body>
+</html>
