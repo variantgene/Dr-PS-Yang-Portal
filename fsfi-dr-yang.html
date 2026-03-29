@@ -165,7 +165,10 @@
             <div class="doctor-info">
                 <div class="doctor-name-en">Dr. Penny Yang</div>
                 <div class="doctor-name-zh">楊佩珊醫師</div>
-                <div class="dept-info">台北亞緻整形外科醫美中心 醫學美容泌尿外科專科</div>
+                <div class="dept-info">
+                    <span class="en">Taipei Arts Plastic Clinic | Aesthetic Medicine & Urology Specialist</span>
+                    <span class="zh">台北亞緻整形外科醫美中心 | 醫學美容泌尿外科專科</span>
+                </div>
             </div>
         </div>
 
@@ -728,6 +731,7 @@
             const txtScore = isZh ? "FSFI 總分" : "Total FSFI Score";
             const txtChart = isZh ? "各領域得分視覺分析圖" : "Domain Score Visual Representation";
             const txtFooter = isZh ? "機密臨床資料" : "CONFIDENTIAL CLINICAL DATA";
+			const txtDept = isZh ? "台北亞緻整形外科醫美中心 | 醫學美容泌尿外科專科" : "Taipei Arts Plastic Clinic | Aesthetic Medicine & Urology Specialist";
 
             const printView = window.open('', '_blank');
             printView.document.write(`
@@ -764,7 +768,7 @@
             <img src="arts.clinic.logo.05.png" class="print-logo" alt="Logo">
             <div class="print-clinic-title">Taipei Arts Plastic Clinic</div>
             <div class="print-doctor-info">Dr. Penny Yang | 楊佩珊醫師</div>
-            <div class="print-doctor-info">台北亞緻整形外科醫美中心 醫學美容泌尿外科專科</div>
+            <div class="print-doctor-info">${txtDept}</div>
         </div>
 
         <h1>${txtTitle}</h1>
