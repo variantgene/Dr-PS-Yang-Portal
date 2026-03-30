@@ -143,6 +143,42 @@
             width: 100%; background-color: transparent; color: #c08497; border: 2px solid #c08497; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
         }
         button.edit-btn:hover { background-color: #fffafb; }
+
+        /* THE OFFICIAL FOOTER STYLING */
+        .print-footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #f0e6e9; /* Blush Pink border */
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        /* =========================================
+           1-PAGE AGGRESSIVE PRINT ENGINE (A4)
+           ========================================= */
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            @page { size: A4 portrait; margin: 15mm; }
+            
+            body { background-color: white !important; padding: 0 !important; margin: 0 !important; }
+            .ipad-container { box-shadow: none !important; border-top: none !important; padding: 0 !important; max-width: 100% !important; }
+
+            /* HIDE EVERYTHING EXCEPT THE DASHBOARD */
+            .clinical-header, h1, .subtitle, .lang-switch-container, .calc-btn, .print-btn, .edit-btn { display: none !important; }
+
+            /* SHRINK SPACING TO FORCE 1 PAGE */
+            #results-dashboard { margin-top: 0 !important; padding-top: 0 !important; border-top: none !important; }
+            h3 { margin-top: 0 !important; margin-bottom: 10px !important; }
+            .score-display { padding: 10px !important; margin-bottom: 15px !important; }
+            
+            /* SHRINK THE RADAR CHART SO IT FITS ON ONE PAGE */
+            .chart-container { height: 400px !important; margin-bottom: 10px !important; }
+            
+            .print-footer { margin-top: 10px !important; padding-top: 10px !important; margin-bottom: 0 !important;}
+        }
     </style>
 </head>
 <body class="lang-en">
@@ -156,7 +192,7 @@
 
         <div class="clinical-header">
             <a href="https://www.taipei-arts-plastic-clinic.com/team_detail.asp?id=920" target="_blank" class="logo-link">
-                <img src="arts.clinic.logo.05.png" alt="Taipei Arts Plastic Clinic" class="logo-image">
+                <img src="arts.clinic.logo.05.png" alt="Taipei Arts Plastic Clinic" class="logo-image" onerror="this.style.display='none'">
             </a>
             <div class="clinic-sub">
                 <span class="en">Clinical Diagnostic Tool | Taipei Arts Plastic Clinic</span>
@@ -578,9 +614,17 @@
                 <div class="total-number" id="total-score-display">0.0</div>
                 <div id="clinical-interpretation" class="clinical-interpretation">Awaiting calculation...</div>
             </div>
+            
             <div class="chart-container">
                 <canvas id="radarChart"></canvas>
             </div>
+            
+            <div class="print-footer">
+                <span class="en">Generated:</span><span class="zh">生成時間：</span> <span id="timestamp-out">--</span><br>
+                <span class="en">CONFIDENTIAL CLINICAL DATA | Taipei Arts Plastic Clinic - Dr. Penny Yang</span>
+                <span class="zh">機密臨床數據 | 台北亞緻整形外科醫美中心 - 楊佩珊醫師</span>
+            </div>
+            
             <button type="button" class="print-btn" onclick="printReport()">
                 <span class="en">Export Clinical Report (PDF/Print)</span>
                 <span class="zh">匯出臨床報告 (PDF/列印)</span>
@@ -627,6 +671,10 @@
                 }
                 return;
             }
+
+            // Set the generation timestamp at the exact moment of calculation
+            const now = new Date();
+            document.getElementById('timestamp-out').innerText = now.toLocaleString('en-US');
 
             let desireScore = (vals.q1 + vals.q2) * 0.6;
             let arousalScore = (vals.q3 + vals.q4 + vals.q5 + vals.q6) * 0.3;
@@ -713,96 +761,7 @@
         }
 
         function printReport() {
-            if (!clinicalChart) {
-                const isZh = document.body.classList.contains('lang-zh');
-                alert(isZh ? "臨床提示：請在匯出前計算結果。" : "Clinical Alert: Please calculate the results before exporting.");
-                return;
-            }
-
-            const isZh = document.body.classList.contains('lang-zh');
-            const scoreNum = document.getElementById('total-score-display').innerText;
-            const interpretationHTML = document.getElementById('clinical-interpretation').innerHTML;
-            const chartImageBase64 = clinicalChart.toBase64Image(); 
-            
-            const now = new Date();
-            const timestamp = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
-
-            const txtTitle = isZh ? "FSFI 病患診斷報告" : "FSFI Patient Diagnostic Report";
-            const txtScore = isZh ? "FSFI 總分" : "Total FSFI Score";
-            const txtChart = isZh ? "各領域得分視覺分析圖" : "Domain Score Visual Representation";
-            const txtFooter = isZh ? "機密臨床資料" : "CONFIDENTIAL CLINICAL DATA";
-			const txtDept = isZh ? "台北亞緻整形外科醫美中心 | 醫學美容泌尿外科專科" : "Taipei Arts Plastic Clinic | Aesthetic Medicine & Urology Specialist";
-
-            const printView = window.open('', '_blank');
-            printView.document.write(`
-<html>
-<head>
-    <title>FSFI Report - ${timestamp}</title>
-    <style>
-        @page { size: A4 portrait; margin: 20mm; }
-        body { font-family: 'Helvetica Neue', Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif; color: #333; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact;}
-        .print-container { width: 100%; max-width: 170mm; margin: 0 auto; padding-top: 10mm; }
-        .print-header { text-align: center; margin-bottom: 20mm; border-bottom: 2px solid #f0e6e9; padding-bottom: 10mm;}
-        .print-logo { max-height: 25mm; width: auto; margin-bottom: 5mm;}
-        .print-clinic-title { font-size: 14pt; color: #a76b7e; margin-bottom: 2mm;}
-        .print-doctor-info { font-size: 11pt; color: #555;}
-        h1 { font-size: 16pt; color: #c08497; text-align: center; margin-bottom: 10mm; font-weight: 300; letter-spacing: 1px;}
-        h2 { font-size: 12pt; color: #a76b7e; margin-top: 15mm; margin-bottom: 5mm;}
-        .print-score-display { text-align: center; margin-bottom: 15mm; padding: 10mm; border-radius: 8px; border: 1px solid #ddd;}
-        .score-safe { background-color: #e8f5e9 !important; border-color: #c8e6c9 !important;}
-        .score-risk { background-color: #ffebee !important; border-color: #ffcdd2 !important;}
-        .total-number { font-size: 48pt; font-weight: bold; margin: 5mm 0; color: #333;}
-        .clinical-interpretation { font-size: 11pt; color: #555; line-height: 1.5;}
-        .clinical-interpretation strong { color: #333;}
-        .print-chart-img { width: 100%; height: auto; max-height: 120mm; object-fit: contain; margin-top: 5mm;}
-        .print-footer { margin-top: 30mm; border-top: 1px solid #ddd; padding-top: 5mm; font-size: 9pt; color: #888; text-align: right;}
-        .print-instruction { position: fixed; bottom: 10px; left: 10px; background: #333; color: white; padding: 5px 10px; border-radius: 4px; font-size: 10pt; z-index: 1000;}
-        @media print { .print-instruction { display: none; } }
-    </style>
-</head>
-<body>
-    <div class="print-instruction">${isZh ? '正在產生列印預覽... (完成後請關閉此分頁)' : 'Generating print preview... (Please close this tab when finished)'}</div>
-    
-    <div class="print-container">
-        <div class="print-header">
-            <img src="arts.clinic.logo.05.png" class="print-logo" alt="Logo">
-            <div class="print-clinic-title">Taipei Arts Plastic Clinic</div>
-            <div class="print-doctor-info">Dr. Penny Yang | 楊佩珊醫師</div>
-            <div class="print-doctor-info">${txtDept}</div>
-        </div>
-
-        <h1>${txtTitle}</h1>
-        
-        <div class="print-score-display ${parseFloat(scoreNum) <= 26.55 ? 'score-risk' : 'score-safe'}">
-            <div style="font-size: 12pt;">${txtScore}</div>
-            <div class="total-number">${scoreNum}</div>
-            <div class="clinical-interpretation">${interpretationHTML}</div>
-        </div>
-        
-        <h2>${txtChart}</h2>
-        <img src="${chartImageBase64}" class="print-chart-img" alt="Radar Graph">
-
-        <div class="print-footer">
-            Generated: ${timestamp}<br>
-            ${txtFooter} | Taipei Arts Plastic Clinic - Dr. Penny Yang
-        </div>
-    </div>
-
-    <script>
-        const logo = document.querySelector('.print-logo');
-        if (logo.complete) { handlePrint(); } else { logo.onload = handlePrint; logo.onerror = handlePrint; }
-
-        function handlePrint() {
-            setTimeout(() => {
-                window.print();
-                document.querySelector('.print-instruction').innerText = "${isZh ? '報告已生成，您可以關閉此分頁。' : 'Report generated. You may close this tab.'}";
-            }, 500); 
-        }
-    <\\/script>
-</body>
-</html>
-            `);
-            printView.document.close(); 
+            window.print();
         }
     </script>
 </body>
