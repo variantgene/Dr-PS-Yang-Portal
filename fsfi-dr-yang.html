@@ -156,28 +156,60 @@
             margin-bottom: 20px;
         }
 
-        /* =========================================
-           1-PAGE AGGRESSIVE PRINT ENGINE (A4)
+		/* =========================================
+           1-PAGE FLAWLESS PRINT ENGINE (A4)
            ========================================= */
         @media print {
+            /* Force exact background colors and sizing */
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             @page { size: A4 portrait; margin: 15mm; }
             
             body { background-color: white !important; padding: 0 !important; margin: 0 !important; }
             .ipad-container { box-shadow: none !important; border-top: none !important; padding: 0 !important; max-width: 100% !important; }
 
-            /* HIDE EVERYTHING EXCEPT THE DASHBOARD */
-            .clinical-header, h1, .subtitle, .lang-switch-container, .calc-btn, .print-btn, .edit-btn { display: none !important; }
+            /* HIDE EVERYTHING EXCEPT DASHBOARD */
+            .clinical-header, h1, .subtitle, .lang-switch-container, .calc-btn, .print-btn, .edit-btn, #fsfi-form { display: none !important; }
 
-            /* SHRINK SPACING TO FORCE 1 PAGE */
-            #results-dashboard { margin-top: 0 !important; padding-top: 0 !important; border-top: none !important; }
-            h3 { margin-top: 0 !important; margin-bottom: 10px !important; }
-            .score-display { padding: 10px !important; margin-bottom: 15px !important; }
+            /* FORCE VERTICAL STACKING TO PREVENT OVERLAP */
+            #results-dashboard { 
+                display: flex !important; 
+                flex-direction: column !important; 
+                margin-top: 0 !important; 
+                padding-top: 0 !important; 
+                border-top: none !important; 
+            }
+
+            /* LOCK THE ELEMENT ORDER SO THE CHART CANNOT JUMP AROUND */
+            h3 { 
+                margin-top: 0 !important; 
+                margin-bottom: 15px !important; 
+                order: 1 !important; 
+            }
             
-            /* SHRINK THE RADAR CHART SO IT FITS ON ONE PAGE */
-            .chart-container { height: 400px !important; margin-bottom: 10px !important; }
+            .score-display { 
+                padding: 15px !important; 
+                margin-bottom: 20px !important; 
+                page-break-inside: avoid !important; 
+                order: 2 !important; 
+            }
             
-            .print-footer { margin-top: 10px !important; padding-top: 10px !important; margin-bottom: 0 !important;}
+            /* RESTRAIN THE CANVAS HEIGHT TO PREVENT SPILLOVER */
+            .chart-container { 
+                position: relative !important;
+                height: 450px !important; 
+                width: 100% !important;
+                margin-bottom: 20px !important; 
+                page-break-inside: avoid !important;
+                order: 3 !important; 
+                display: block !important;
+            }
+            
+            .print-footer { 
+                margin-top: 20px !important; 
+                padding-top: 15px !important; 
+                page-break-inside: avoid !important;
+                order: 4 !important; 
+            }
         }
     </style>
 </head>
