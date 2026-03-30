@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Male Clinical Diagnostic Tool - Dr. Penny Yang</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* THE AESTHETIC ENGINE: SLATE BLUE */
+        :root {
+            --primary-color: #4A6B82; 
+            --primary-light: #7393A7;
+            --primary-bg: #E8EEF2;
+            --border-color: #D1DCE3;
+            --safe-color: #43A047;
+            --risk-color: #E53935;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+            transition: background-color 0.3s;
+        }
+        .ipad-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            border-top: 6px solid var(--primary-color);
+            position: relative; 
+        }
+
+        /* --- THE LANGUAGE TOGGLE ENGINE --- */
+        body.lang-en .zh { display: none !important; }
+        body.lang-zh .en { display: none !important; }
+        
+        .lang-switch-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-bg);
+            border-radius: 20px;
+            display: flex;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .lang-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 15px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-btn.active { background: var(--primary-color); color: white; }
+
+        /* CLINIC LOGO & TITLE HEADER */
+        .clinical-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+        .logo-link { display: inline-block; margin-bottom: 20px; }
+        .logo-image { max-height: 120px; width: auto; transition: transform 0.2s ease; }
+        .logo-link:hover .logo-image { transform: scale(1.03); }
+        .clinic-sub { color: #888; font-size: 14px; margin-bottom: 10px; }
+        .doctor-info {
+            background-color: #fafbfc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: inline-block;
+        }
+        .doctor-name-en { font-size: 20px; color: var(--primary-color); font-weight: 300; margin-bottom: 3px; }
+        .doctor-name-zh { font-size: 16px; color: var(--primary-light); }
+        .dept-info { font-size: 13px; color: #888; margin-top: 8px; }
+
+        h1, h2, h3 { color: var(--primary-color); text-align: center; font-weight: 300; }
+        h1 { font-size: 22px; margin-bottom: 5px; line-height: 1.4;}
+        .subtitle { text-align: center; color: #888; margin-bottom: 40px; font-size: 13px; }
+        
+        .domain-section {
+            background: #fafbfc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .domain-title {
+            font-size: 18px;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .question-block { margin-bottom: 25px; }
+        p.q-text { margin: 0 0 12px 0; font-weight: 500; font-size: 15px; color: #444; line-height: 1.5;}
+        
+        label.radio-block, label.check-block {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 5px 0;
+            transition: color 0.2s ease;
+        }
+        label.radio-block:hover, label.check-block:hover { color: var(--primary-color); }
+        .simple-radio, .simple-checkbox { margin-right: 12px; display: inline-block !important; width: 18px; height: 18px;}
+
+        /* BUTTONS */
+        button.calc-btn {
+            width: 100%; background-color: var(--primary-color); color: white; border: none; padding: 18px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; margin-top: 20px; box-shadow: 0 4px 15px rgba(74, 107, 130, 0.3);
+        }
+        button.calc-btn:hover { background-color: var(--primary-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(74, 107, 130, 0.4);}
+        
+        button.print-btn {
+            width: 100%; background-color: #6c757d; color: white; border: none; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; margin-bottom: 15px; margin-top: 30px;
+        }
+        button.print-btn:hover { background-color: #5a6268; }
+
+        button.edit-btn {
+            width: 100%; background-color: transparent; color: var(--primary-color); border: 2px solid var(--primary-color); padding: 15px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
+        }
+        button.edit-btn:hover { background-color: var(--primary-bg); }
+
+        /* DASHBOARD RESULTS */
+        #results-dashboard { display: none; margin-top: 40px; padding-top: 40px; border-top: 2px dashed #ddd; }
+        
+        /* Red Flags Alert Box */
+        .red-flag-container { background-color: #ffebee; border-left: 5px solid var(--risk-color); padding: 15px; border-radius: 4px; margin-bottom: 30px; display: none; }
+        .red-flag-title { color: var(--risk-color); font-weight: bold; margin-bottom: 10px; display: flex; align-items: center;}
+        .flag-tag { display: inline-block; background: white; color: var(--risk-color); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-right: 8px; margin-bottom: 8px; border: 1px solid #ffcdd2;}
+
+        /* Metrics Grid */
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        @media(max-width: 600px) { .metrics-grid { grid-template-columns: 1fr; } }
+        
+        .metric-card { background: #fafbfc; border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; text-align: center; }
+        .metric-title { font-size: 14px; color: var(--primary-color); font-weight: bold; margin-bottom: 15px; text-transform: uppercase;}
+        
+        /* Progress Bar Custom */
+        .sens-bar-bg { width: 100%; height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; position: relative; margin: 20px 0;}
+        .sens-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary-color), var(--risk-color)); width: 0%; transition: width 1s ease-out; }
+        .sens-number { font-size: 32px; font-weight: bold; color: #333; }
+        
+        /* Gauge Container */
+        .gauge-container { position: relative; height: 160px; width: 100%; display: flex; justify-content: center; align-items: flex-end; margin-top: 10px;}
+        .gauge-score-abs { position: absolute; bottom: 0px; text-align: center; width: 100%;}
+        .gauge-number { font-size: 46px; font-weight: bold; line-height: 1; margin-bottom: 5px; transition: color 0.5s ease;}
+        .gauge-status { font-size: 15px; font-weight: bold; }
+
+        /* THE NEW DOSSIER MATRIX */
+        .dossier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px; }
+        @media(max-width: 768px) { .dossier-grid { grid-template-columns: 1fr; } }
+        
+        .dossier-col { background: #fff; padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); text-align: left; }
+        .dossier-col-title { font-size: 13px; color: var(--primary-light); font-weight: bold; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 5px; text-transform: uppercase; }
+        
+        .dossier-item { font-size: 15px; margin-bottom: 10px; color: #333; line-height: 1.4;}
+        .dossier-item strong { color: var(--primary-color); display: block; font-size: 12px; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px;}
+        
+        .goals-banner { background: var(--primary-bg); padding: 20px; border-radius: 8px; text-align: center; margin-top: 20px; border: 1px solid var(--border-color); }
+        .goals-banner-title { font-size: 13px; color: var(--primary-color); font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
+        .goals-banner-content { font-size: 20px; font-weight: bold; color: var(--primary-color); }
+		/* =========================================
+           THE PRINT ENGINE (A4)
+           ========================================= */
+        @media print {
+            /* Force the browser to print our background colors and gradients! */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            /* Set the page size to standard A4 */
+            @page {
+                size: A4 portrait;
+                margin: 15mm;
+            }
+
+            body {
+                background-color: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* Strip away the iPad UI container effects */
+            .ipad-container {
+                box-shadow: none !important;
+                border-top: none !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+
+            /* HIDE EVERYTHING WE DONT WANT ON THE PDF */
+            .lang-switch-container, 
+            .calc-btn, 
+            .print-btn, 
+            .edit-btn,
+            .subtitle {
+                display: none !important;
+            }
+
+            /* Adjust the header so it fits cleanly on paper */
+            .clinical-header {
+                margin-top: 0 !important;
+                padding-bottom: 15px !important;
+                margin-bottom: 25px !important;
+            }
+
+            /* Ensure the Chart.js Canvas prints at the correct size */
+            .gauge-container {
+                height: 180px !important; 
+                page-break-inside: avoid;
+            }
+
+            /* Ensure the Dossier Matrix doesn't break across pages */
+            .metric-card, .dossier-grid, .goals-banner {
+                page-break-inside: avoid;
+            }
+            
+            /* Slightly reduce font sizes to ensure everything fits on one page */
+            h1 { font-size: 18px !important; }
+            .metric-title { font-size: 12px !important; }
+            .dossier-item { font-size: 12px !important; }
+        }
+    </style>
+</head>
+<body class="lang-en">
+
+    <div class="ipad-container">
+        
+        <div class="lang-switch-container">
+            <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+            <button class="lang-btn" id="btn-zh" onclick="setLang('zh')">繁體中文</button>
+        </div>
+
+        <div class="clinical-header">
+            <a href="#" class="logo-link">
+                <img src="arts.clinic.logo.05.png" alt="Taipei Arts Plastic Clinic" class="logo-image" onerror="this.style.display='none'">
+            </a>
+            <div class="clinic-sub">
+                <span class="en">Male Clinical Diagnostic Tool | Taipei Arts Plastic Clinic</span>
+                <span class="zh">男性臨床診斷工具 | 台北亞緻診所</span>
+            </div>
+            <div class="doctor-info">
+                <div class="doctor-name-en">Dr. Penny Yang</div>
+                <div class="doctor-name-zh">楊佩珊醫師</div>
+                <div class="dept-info">
+                    <span class="en">Taipei Arts Plastic Clinic | Aesthetic Medicine & Urology Specialist</span>
+                    <span class="zh">台北亞緻整形外科醫美中心 | 醫學美容泌尿外科專科</span>
+                </div>
+            </div>
+        </div>
+
+        <h1>
+            <span class="en">MALE SEXUAL HEALTH EVALUATION</span>
+            <span class="zh">男性性健康評估問卷</span>
+        </h1>
+        <div class="subtitle">
+            <span class="en">Confidential Patient Diagnostic Intake</span>
+            <span class="zh">機密病患診斷問卷</span>
+        </div>
+        
+        <form id="iief5-form">
+            
+            <div class="domain-section">
+                <div class="domain-title">
+                    <span class="en">Part 1: IIEF-5 (Erectile Function)</span>
+                    <span class="zh">第一部分：IIEF-5 勃起功能指標</span>
+                </div>
+                
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">1. How do you rate your confidence that you could get and keep an erection?</span>
+                        <span class="zh">1. 您對於獲得勃起並維持勃起的信心如何？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief1" value="1">
+                        <span class="en">Very low</span><span class="zh">非常低</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief1" value="2">
+                        <span class="en">Low</span><span class="zh">低</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief1" value="3">
+                        <span class="en">Moderate</span><span class="zh">中等</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief1" value="4">
+                        <span class="en">High</span><span class="zh">高</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief1" value="5">
+                        <span class="en">Very high</span><span class="zh">非常高</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">2. When you had erections with sexual stimulation, how often were your erections hard enough for penetration?</span>
+                        <span class="zh">2. 當您受到性刺激時，勃起的硬度足以進入陰道的頻率？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief2" value="0">
+                        <span class="en">No sexual activity</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief2" value="1">
+                        <span class="en">Almost never or never</span><span class="zh">幾乎沒有或完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief2" value="2">
+                        <span class="en">A few times</span><span class="zh">少於一半</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief2" value="3">
+                        <span class="en">Sometimes</span><span class="zh">約一半</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief2" value="4">
+                        <span class="en">Most times</span><span class="zh">多於一半</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief2" value="5">
+                        <span class="en">Almost always or always</span><span class="zh">幾乎每次</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">3. During sexual intercourse, how often were you able to maintain your erection after you had penetrated your partner?</span>
+                        <span class="zh">3. 性交過程中，您能維持勃起的頻率？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief3" value="0">
+                        <span class="en">Did not attempt intercourse</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief3" value="1">
+                        <span class="en">Almost never or never</span><span class="zh">幾乎沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief3" value="2">
+                        <span class="en">A few times</span><span class="zh">少於一半</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief3" value="3">
+                        <span class="en">Sometimes</span><span class="zh">約一半</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief3" value="4">
+                        <span class="en">Most times</span><span class="zh">多於一半</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief3" value="5">
+                        <span class="en">Almost always or always</span><span class="zh">幾乎每次</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">4. During sexual intercourse, how difficult was it to maintain your erection to completion of intercourse?</span>
+                        <span class="zh">4. 性交時，維持勃起直到完成的困難程度？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief4" value="0">
+                        <span class="en">Did not attempt intercourse</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief4" value="1">
+                        <span class="en">Extremely difficult</span><span class="zh">非常困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief4" value="2">
+                        <span class="en">Very difficult</span><span class="zh">困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief4" value="3">
+                        <span class="en">Difficult</span><span class="zh">稍有困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief4" value="4">
+                        <span class="en">Slightly difficult</span><span class="zh">輕微困難</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief4" value="5">
+                        <span class="en">Not difficult</span><span class="zh">完全不困難</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p class="q-text">
+                        <span class="en">5. When you attempted sexual intercourse, how often was it satisfactory for you?</span>
+                        <span class="zh">5. 您對性交的滿意程度？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief5" value="0">
+                        <span class="en">Did not attempt intercourse</span><span class="zh">無性活動</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief5" value="1">
+                        <span class="en">Almost never or never</span><span class="zh">非常不滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief5" value="2">
+                        <span class="en">A few times</span><span class="zh">不滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief5" value="3">
+                        <span class="en">Sometimes</span><span class="zh">普通</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief5" value="4">
+                        <span class="en">Most times</span><span class="zh">滿意</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio iief" name="iief5" value="5">
+                        <span class="en">Almost always or always</span><span class="zh">非常滿意</span></label>
+                </div>
+            </div>
+
+            <div class="domain-section">
+                <div class="domain-title">
+                    <span class="en">Part 2: Glans Sensitivity Questionnaire</span>
+                    <span class="zh">第二部分：龜頭敏感度評估</span>
+                </div>
+                
+                <div class="question-block">
+                    <p class="q-text"><span class="en">1. Subjective Sensitivity: How do you rate your glans sensitivity?</span><span class="zh">1. A.主觀敏感度：您覺得龜頭敏感度如何？</span></p>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs1" value="1"><span class="en">Very insensitive</span><span class="zh">非常不敏感</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs1" value="2"><span class="en">Somewhat insensitive</span><span class="zh">偏不敏感</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs1" value="3"><span class="en">Normal</span><span class="zh">正常</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs1" value="4"><span class="en">Somewhat sensitive</span><span class="zh">偏敏感</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs1" value="5"><span class="en">Very sensitive</span><span class="zh">非常敏感</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p class="q-text"><span class="en">2. Stimulation Response: Intensity of sensation to light touch?</span><span class="zh">2. B.刺激反應：輕微觸碰時的感覺強度？</span></p>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs2" value="1"><span class="en">Almost none</span><span class="zh">幾乎無感</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs2" value="2"><span class="en">Weak</span><span class="zh">弱</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs2" value="3"><span class="en">Moderate</span><span class="zh">中等</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs2" value="4"><span class="en">Strong</span><span class="zh">強</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs2" value="5"><span class="en">Very strong</span><span class="zh">非常強</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p class="q-text"><span class="en">3. During sexual stimulation, does sensitivity rise too quickly?</span><span class="zh">3. 性刺激時，敏感度是否過快上升？</span></p>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs3" value="1"><span class="en">Never</span><span class="zh">完全不會</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs3" value="2"><span class="en">Occasionally</span><span class="zh">偶爾</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs3" value="3"><span class="en">Half the time</span><span class="zh">一半時間</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs3" value="4"><span class="en">Most of the time</span><span class="zh">多數時間</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs3" value="5"><span class="en">Almost always</span><span class="zh">幾乎每次</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p class="q-text"><span class="en">4. Ejaculatory Control: Do you ejaculate quickly due to glans stimulation?</span><span class="zh">4. C.射精控制：是否容易因龜頭刺激而快速射精？</span></p>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs4" value="1"><span class="en">Never</span><span class="zh">完全不會</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs4" value="2"><span class="en">Occasionally</span><span class="zh">偶爾</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs4" value="3"><span class="en">Half the time</span><span class="zh">一半時間</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs4" value="4"><span class="en">Most of the time</span><span class="zh">多數時間</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs4" value="5"><span class="en">Almost always</span><span class="zh">幾乎每次</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p class="q-text"><span class="en">5. Do you need to reduce stimulation (e.g., use a condom) to last longer?</span><span class="zh">5. 您是否需要降低刺激（如使用保險套）才能延長時間？</span></p>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs5" value="1"><span class="en">Never need</span><span class="zh">不需要</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs5" value="2"><span class="en">Occasionally</span><span class="zh">偶爾</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs5" value="3"><span class="en">Sometimes</span><span class="zh">有時</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs5" value="4"><span class="en">Often</span><span class="zh">常常</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs5" value="5"><span class="en">Always need</span><span class="zh">一定需要</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p class="q-text"><span class="en">6. Functional Impact: Does glans sensitivity impact sexual satisfaction?</span><span class="zh">6. D.功能影響：龜頭敏感度是否影響性生活滿意度？</span></p>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs6" value="1"><span class="en">Not at all</span><span class="zh">完全沒有</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs6" value="2"><span class="en">Mildly</span><span class="zh">輕微</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs6" value="3"><span class="en">Moderately</span><span class="zh">中等</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs6" value="4"><span class="en">Significantly</span><span class="zh">明顯</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs6" value="5"><span class="en">Severely</span><span class="zh">嚴重</span></label>
+                </div>
+            </div>
+
+            <div class="domain-section">
+                <div class="domain-title">
+                    <span class="en">Part 3: Clinical Profile & Goals</span>
+                    <span class="zh">第三部分：臨床檔案與改善目標</span>
+                </div>
+                
+                <div class="question-block">
+                    <p class="q-text"><strong>A & B. Sexual Activity Profile | 表現檔案</strong></p>
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;">
+                        <span class="en">Sexual frequency (per week):</span><span class="zh">性生活頻率（每週）：</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_a1" value="0"> <span class="en">0</span><span class="zh">0</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_a1" value="1"> <span class="en">1</span><span class="zh">1</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_a1" value="2-3"> <span class="en">2-3</span><span class="zh">2-3</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_a1" value="4-5"> <span class="en">4-5</span><span class="zh">4-5</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_a1" value=">5"> <span class="en">>5</span><span class="zh">>5</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;">
+                        <span class="en">Partner type:</span><span class="zh">性伴侶類型：</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_a2" value="Fixed"> <span class="en">Fixed partner</span><span class="zh">固定伴侶</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_a2" value="Multiple"> <span class="en">Multiple partners</span><span class="zh">多重伴侶</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_a2" value="None"> <span class="en">No fixed partner</span><span class="zh">無固定伴侶</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p class="q-text"><strong>C. Ejaculation Profile | 射精狀態</strong></p>
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;">
+                        <span class="en">Ejaculation time (inside vagina):</span><span class="zh">射精時間（陰道內）：</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_c6" value="<1min"> <span class="en">< 1 min</span><span class="zh">< 1分鐘</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_c6" value="1-3min"> <span class="en">1–3 min</span><span class="zh">1–3分鐘</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_c6" value="3-5min"> <span class="en">3–5 min</span><span class="zh">3–5分鐘</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_c6" value=">5min"> <span class="en">> 5 min</span><span class="zh">> 5分鐘</span></label>
+                </div>
+                <div class="question-block">
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;">
+                        <span class="en">Do you feel you ejaculate too quickly?</span><span class="zh">是否覺得射精過快？</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_c7" value="No"> <span class="en">No</span><span class="zh">否</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_c7" value="Yes"> <span class="en">Yes</span><span class="zh">是</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p class="q-text"><strong>D & E. Libido & Satisfaction | 性慾與滿意度</strong></p>
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;">
+                        <span class="en">Libido level (1=Very low, 5=Very high):</span><span class="zh">性慾程度 (1=非常低, 5=非常高)：</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_d8" value="1"> <span class="en">1</span><span class="zh">1</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_d8" value="2"> <span class="en">2</span><span class="zh">2</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_d8" value="3"> <span class="en">3</span><span class="zh">3</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_d8" value="4"> <span class="en">4</span><span class="zh">4</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_d8" value="5"> <span class="en">5</span><span class="zh">5</span></label>
+                </div>
+                <div class="question-block">
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;">
+                        <span class="en">Overall sexual satisfaction (1=Very low, 5=Very high):</span><span class="zh">整體性生活滿意度 (1=非常低, 5=非常高)：</span>
+                    </p>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_e10" value="1"> <span class="en">1</span><span class="zh">1</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_e10" value="2"> <span class="en">2</span><span class="zh">2</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_e10" value="3"> <span class="en">3</span><span class="zh">3</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_e10" value="4"> <span class="en">4</span><span class="zh">4</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_e10" value="5"> <span class="en">5</span><span class="zh">5</span></label>
+                </div>
+
+                <div class="question-block">
+                    <p class="q-text"><strong>F. Medical & Goals | 醫療病史與目標</strong></p>
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;">
+                        <span class="en">Pre-existing conditions (Select all that apply):</span><span class="zh">是否有以下疾病（可複選）：</span>
+                    </p>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox med-check" value="Diabetes"> <span class="en">Diabetes</span><span class="zh">糖尿病</span></label>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox med-check" value="Hypertension"> <span class="en">Hypertension</span><span class="zh">高血壓</span></label>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox med-check" value="Cardiovascular"> <span class="en">Cardiovascular Disease</span><span class="zh">心血管疾病</span></label>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox med-check" value="None"> <span class="en">None</span><span class="zh">無</span></label>
+                </div>
+                <div class="question-block">
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;">
+                        <span class="en">Current medications (Select all that apply):</span><span class="zh">是否使用相關藥物（可複選）：</span>
+                    </p>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox rx-check" value="PDE5"> <span class="en">PDE5 inhibitor (e.g., Viagra)</span><span class="zh">PDE5 inhibitor（威而鋼類）</span></label>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox rx-check" value="Antidepressants"> <span class="en">Antidepressants</span><span class="zh">抗憂鬱藥</span></label>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox rx-check" value="None"> <span class="en">None</span><span class="zh">無</span></label>
+                </div>
+                <div class="question-block">
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;">
+                        <span class="en">Lifestyle habits (Select all that apply):</span><span class="zh">生活習慣（可複選）：</span>
+                    </p>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox life-check" value="Smoking"> <span class="en">Smoking</span><span class="zh">抽菸</span></label>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox life-check" value="Alcohol"> <span class="en">Alcohol</span><span class="zh">飲酒</span></label>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox life-check" value="Exercise"> <span class="en">Exercise</span><span class="zh">運動</span></label>
+                </div>
+                <div class="question-block" style="background:#e8eef2; padding:15px; border-radius:6px;">
+                    <p style="font-size: 14px; color:var(--primary-color); font-weight:bold; margin-bottom:10px;">
+                        <span class="en">What do you most want to improve? (Select all that apply):</span><span class="zh">您最想改善的是？（可複選）：</span>
+                    </p>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox goal-check" value="Hardness"> <span class="en">Erection Hardness</span><span class="zh">勃起硬度</span></label>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox goal-check" value="Stamina"> <span class="en">Stamina / Duration</span><span class="zh">持久度</span></label>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox goal-check" value="Sensitivity"> <span class="en">Sensitivity Control</span><span class="zh">敏感度</span></label>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox goal-check" value="Libido"> <span class="en">Libido / Desire</span><span class="zh">性慾</span></label>
+                    <label class="check-block"><input type="checkbox" class="simple-checkbox goal-check" value="Appearance"> <span class="en">Appearance (Size/Glans)</span><span class="zh">外觀（尺寸/龜頭）</span></label>
+                </div>
+
+            </div>
+
+            <button type="button" class="calc-btn" onclick="executeDashboardLogic()">
+                <span class="en">Generate Clinical Dashboard</span>
+                <span class="zh">生成臨床儀表板</span>
+            </button>
+        </form>
+
+        <div id="results-dashboard">
+            <h3>
+                <span class="en">CLINICAL DASHBOARD</span>
+                <span class="zh">臨床儀表板</span>
+            </h3>
+            
+            <div id="red-flag-zone" class="red-flag-container">
+                <div class="red-flag-title">
+                    <span class="en">⚠️ CLINICAL ALERTS (Triage Flags)</span>
+                    <span class="zh">⚠️ 臨床警示 (Triage Flags)</span>
+                </div>
+                <div id="flag-tags-output"></div>
+            </div>
+
+            <div class="metrics-grid">
+                
+                <div class="metric-card">
+                    <div class="metric-title">
+                        <span class="en">IIEF-5 (Erectile Function)</span>
+                        <span class="zh">IIEF-5 勃起功能</span>
+                    </div>
+                    <div class="gauge-container">
+                        <canvas id="iiefGauge"></canvas>
+                        <div class="gauge-score-abs">
+                            <div class="gauge-number" id="iief-score-txt">0</div>
+                            <div class="gauge-status" id="iief-status-txt">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-title">
+                        <span class="en">Glans Sensitivity Profile</span>
+                        <span class="zh">龜頭敏感度剖析</span>
+                    </div>
+                    <div class="sens-number" id="sens-score-txt">0 <span style="font-size:14px; color:#888;">/ 30</span></div>
+                    <div class="sens-bar-bg">
+                        <div class="sens-bar-fill" id="sens-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card" style="padding: 20px;">
+                <div class="metric-title" style="text-align:center;">
+                    <span class="en">Complete Patient Dossier</span>
+                    <span class="zh">完整病患檔案</span>
+                </div>
+                
+                <div class="dossier-grid">
+                    <div class="dossier-col">
+                        <div class="dossier-col-title">
+                            <span class="en">Lifestyle & Partner</span><span class="zh">生活與伴侶狀態</span>
+                        </div>
+                        <div class="dossier-item">
+                            <span class="en"><strong>Sex Frequency (Wk)</strong></span><span class="zh"><strong>性生活頻率 (週)</strong></span>
+                            <span id="dos-freq">--</span>
+                        </div>
+                        <div class="dossier-item">
+                            <span class="en"><strong>Partner Type</strong></span><span class="zh"><strong>伴侶類型</strong></span>
+                            <span id="dos-partner">--</span>
+                        </div>
+                        <div class="dossier-item">
+                            <span class="en"><strong>Habits</strong></span><span class="zh"><strong>生活習慣</strong></span>
+                            <span id="dos-habits">--</span>
+                        </div>
+                    </div>
+
+                    <div class="dossier-col">
+                        <div class="dossier-col-title">
+                            <span class="en">Function & Drive</span><span class="zh">生理機能與性慾</span>
+                        </div>
+                        <div class="dossier-item">
+                            <span class="en"><strong>Libido Score</strong></span><span class="zh"><strong>性慾程度</strong></span>
+                            <span id="dos-libido">--</span> / 5
+                        </div>
+                        <div class="dossier-item">
+                            <span class="en"><strong>Satisfaction Score</strong></span><span class="zh"><strong>整體滿意度</strong></span>
+                            <span id="dos-sat">--</span> / 5
+                        </div>
+                        <div class="dossier-item">
+                            <span class="en"><strong>Ejaculation Time</strong></span><span class="zh"><strong>射精時間</strong></span>
+                            <span id="dos-ejac">--</span>
+                        </div>
+                        <div class="dossier-item">
+                            <span class="en"><strong>Premature Ejac. Distress</strong></span><span class="zh"><strong>自覺射精過快</strong></span>
+                            <span id="dos-distress">--</span>
+                        </div>
+                    </div>
+
+                    <div class="dossier-col">
+                        <div class="dossier-col-title">
+                            <span class="en">Medical Profile</span><span class="zh">醫療病史</span>
+                        </div>
+                        <div class="dossier-item">
+                            <span class="en"><strong>Pre-existing Conditions</strong></span><span class="zh"><strong>現有疾病</strong></span>
+                            <span id="dos-meds">--</span>
+                        </div>
+                        <div class="dossier-item">
+                            <span class="en"><strong>Current Medications</strong></span><span class="zh"><strong>使用藥物</strong></span>
+                            <span id="dos-rx">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="goals-banner">
+                    <div class="goals-banner-title">
+                        <span class="en">Primary Treatment Goals</span><span class="zh">首要治療目標</span>
+                    </div>
+                    <div class="goals-banner-content" id="dos-goals">--</div>
+                </div>
+
+            </div>
+
+            <button type="button" class="print-btn" onclick="printReport()">
+                <span class="en">Export Clinical Dashboard (PDF)</span>
+                <span class="zh">匯出臨床儀表板 (PDF)</span>
+            </button>
+            <button type="button" class="edit-btn" onclick="editAnswers()">
+                <span class="en">Go Back / Edit Intake</span>
+                <span class="zh">返回修改資料</span>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        let gaugeChart; 
+        const sensitivityThreshold = null; 
+
+        // HELPER FUNCTION: Extracts text cleanly for the Dossier
+        function getLabelText(inputElement, isZh) {
+            if (!inputElement) return "--";
+            let span = inputElement.parentElement.querySelector(isZh ? '.zh' : '.en');
+            return span ? span.innerText : inputElement.value;
+        }
+
+        function setupExclusivity(className) {
+            const boxes = document.querySelectorAll(className);
+            boxes.forEach(box => {
+                box.addEventListener('change', function() {
+                    if (this.checked) {
+                        if (this.value === 'None') {
+                            boxes.forEach(b => { if (b !== this) b.checked = false; });
+                        } else {
+                            boxes.forEach(b => { if (b.value === 'None') b.checked = false; });
+                        }
+                    }
+                });
+            });
+        }
+        setupExclusivity('.med-check');
+        setupExclusivity('.rx-check');
+
+        // CUSTOM NEEDLE PLUGIN (REBUILT FOR RELIABILITY & NO OVERLAP)
+        const gaugeNeedle = {
+            id: 'gaugeNeedle',
+            afterDatasetsDraw: (chart, args, options) => {
+                const needleValue = options.score;
+                if (needleValue == null) return;
+                
+                const meta = chart.getDatasetMeta(0);
+                if (!meta || !meta.data || !meta.data[0]) return;
+                
+                const outerRadius = meta.data[0].outerRadius;
+                const innerRadius = meta.data[0].innerRadius;
+
+                // Mathematics perfectly scaled to the dataset sizes (Total 25)
+                let val = Math.max(1, Math.min(25, needleValue));
+                const percentage = val / 25; 
+                const angle = Math.PI + (percentage * Math.PI);
+
+                const ctx = chart.ctx;
+                const cx = chart.chartArea.left + chart.chartArea.width / 2;
+                const cy = chart.chartArea.bottom; 
+
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.rotate(angle);
+                
+                // Draw floating pointer strictly ON the colored arc
+                ctx.beginPath();
+                ctx.moveTo(innerRadius - 4, -6); 
+                ctx.lineTo(outerRadius + 8, 0);   
+                ctx.lineTo(innerRadius - 4, 6);  
+                ctx.fillStyle = '#111';
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        };
+
+        function setLang(lang) {
+            document.body.className = 'lang-' + lang;
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+            if (document.getElementById('results-dashboard').style.display === 'block') {
+                executeDashboardLogic(true); 
+            }
+        }
+
+        function executeDashboardLogic(isRedraw = false) {
+            const isZh = document.body.classList.contains('lang-zh');
+            
+            const iiefQs = ['iief1','iief2','iief3','iief4','iief5'];
+            const gsQs = ['gs1','gs2','gs3','gs4','gs5','gs6'];
+            let iiefScore = 0; let gsScore = 0;
+            let missing = [];
+
+            iiefQs.forEach(q => {
+                let s = document.querySelector(`input[name="${q}"]:checked`);
+                if(s) iiefScore += parseInt(s.value); else missing.push('IIEF Part 1');
+            });
+            gsQs.forEach(q => {
+                let s = document.querySelector(`input[name="${q}"]:checked`);
+                if(s) gsScore += parseInt(s.value); else missing.push('GS Part 2');
+            });
+
+            if (missing.length > 0) {
+                if(!isRedraw) alert(isZh ? "請完成第一與第二部分所有計分題。" : "Please complete all scored questions in Parts 1 and 2.");
+                return;
+            }
+
+            // RED FLAG TRIAGE LOGIC
+            let flags = [];
+            
+            // Exercise flag logic: if unchecked, show alert
+            let exerciseBox = document.querySelector('input.life-check[value="Exercise"]');
+            if (exerciseBox && !exerciseBox.checked) {
+                flags.push(isZh ? '缺乏運動' : 'Lack of Exercise');
+            }
+
+            let eTime = document.querySelector(`input[name="intake_c6"]:checked`);
+            let eFast = document.querySelector(`input[name="intake_c7"]:checked`);
+            if (eTime && eTime.value === '<1min') flags.push(isZh ? '射精 <1分鐘' : 'Ejaculation < 1min');
+            if (eFast && eFast.value === 'Yes') flags.push(isZh ? '自覺射精過快' : 'Premature Ejac. Concern');
+            
+            document.querySelectorAll('.med-check:checked').forEach(el => {
+                if(el.value !== 'None') flags.push(getLabelText(el, isZh));
+            });
+            document.querySelectorAll('.life-check:checked').forEach(el => {
+                if(el.value === 'Smoking') flags.push(isZh ? '抽菸史' : 'Smoker');
+            });
+
+            let flagZone = document.getElementById('red-flag-zone');
+            let flagOut = document.getElementById('flag-tags-output');
+            if (flags.length > 0) {
+                flagZone.style.display = 'block';
+                flagOut.innerHTML = flags.map(f => `<span class="flag-tag">${f}</span>`).join('');
+            } else {
+                flagZone.style.display = 'none';
+            }
+
+            document.getElementById('iief5-form').style.display = 'none'; 
+            document.getElementById('results-dashboard').style.display = 'block';
+
+            // IIEF Color & Text (UPDATED BRACKETS: Severe is 1-7)
+            let iiefStatus = ""; let iiefColor = "";
+            if(iiefScore >= 22) { iiefStatus = isZh ? "正常" : "Normal"; iiefColor = "#43A047"; }
+            else if(iiefScore >= 17) { iiefStatus = isZh ? "輕度 ED" : "Mild ED"; iiefColor = "#8BC34A"; }
+            else if(iiefScore >= 12) { iiefStatus = isZh ? "輕至中度 ED" : "Mild-Mod ED"; iiefColor = "#FFEB3B"; }
+            else if(iiefScore >= 8) { iiefStatus = isZh ? "中度 ED" : "Moderate ED"; iiefColor = "#FF9800"; }
+            else { iiefStatus = isZh ? "重度 ED" : "Severe (1-7)"; iiefColor = "#E53935"; } 
+            
+            let scoreTxtEl = document.getElementById('iief-score-txt');
+            scoreTxtEl.innerText = iiefScore;
+            scoreTxtEl.style.color = iiefColor; 
+
+            let statEl = document.getElementById('iief-status-txt');
+            statEl.innerText = iiefStatus; statEl.style.color = iiefColor;
+
+            document.getElementById('sens-score-txt').innerHTML = `${gsScore} <span style="font-size:14px; color:#888;">/ 30</span>`;
+            let sensPercent = ((gsScore) / 30) * 100;
+            document.getElementById('sens-bar-fill').style.width = sensPercent + "%";
+
+            // POPULATING THE DOSSIER MATRIX (Fixed Data Extractors)
+            let freq = document.querySelector(`input[name="intake_a1"]:checked`);
+            document.getElementById('dos-freq').innerText = getLabelText(freq, isZh);
+            
+            let partner = document.querySelector(`input[name="intake_a2"]:checked`);
+            document.getElementById('dos-partner').innerText = getLabelText(partner, isZh);
+
+            let habits = Array.from(document.querySelectorAll('.life-check:checked')).map(el => getLabelText(el, isZh));
+            document.getElementById('dos-habits').innerText = habits.length > 0 ? habits.join(', ') : (isZh ? "無" : "None");
+
+            let lib = document.querySelector(`input[name="intake_d8"]:checked`);
+            document.getElementById('dos-libido').innerText = getLabelText(lib, isZh);
+            
+            let sat = document.querySelector(`input[name="intake_e10"]:checked`);
+            document.getElementById('dos-sat').innerText = getLabelText(sat, isZh);
+            
+            document.getElementById('dos-ejac').innerText = getLabelText(eTime, isZh);
+            document.getElementById('dos-distress').innerText = getLabelText(eFast, isZh);
+
+            let meds = Array.from(document.querySelectorAll('.med-check:checked')).map(el => getLabelText(el, isZh));
+            document.getElementById('dos-meds').innerText = meds.length > 0 ? meds.join(', ') : (isZh ? "無" : "None");
+
+            let rx = Array.from(document.querySelectorAll('.rx-check:checked')).map(el => getLabelText(el, isZh));
+            document.getElementById('dos-rx').innerText = rx.length > 0 ? rx.join(', ') : (isZh ? "無" : "None");
+
+            let goals = Array.from(document.querySelectorAll('.goal-check:checked')).map(el => getLabelText(el, isZh));
+            document.getElementById('dos-goals').innerText = goals.length > 0 ? goals.join(' | ') : "--";
+
+            // Chart.js Generation
+            const ctx = document.getElementById('iiefGauge').getContext('2d');
+            if (gaugeChart) { gaugeChart.destroy(); } 
+            
+            gaugeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Severe (1-7)', 'Moderate (8-11)', 'Mild-Mod (12-16)', 'Mild (17-21)', 'Normal (22-25)'],
+                    datasets: [{
+                        data: [7, 4, 5, 5, 4], // Data corresponds strictly to interval lengths adding to 25
+                        backgroundColor: ['#E53935', '#FF9800', '#FFEB3B', '#8BC34A', '#43A047'],
+                        borderWidth: 0,
+                        cutout: '75%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    circumference: 180,
+                    rotation: 270,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { enabled: false },
+                        gaugeNeedle: { score: iiefScore } 
+                    }
+                },
+                plugins: [gaugeNeedle] 
+            });
+            
+            if(!isRedraw) window.scrollTo({ top: 0, behavior: 'smooth' }); 
+        }
+
+        function editAnswers() {
+            document.getElementById('results-dashboard').style.display = 'none';
+            document.getElementById('iief5-form').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function printReport() {
+            // Triggers the native print/Save-as-PDF engine
+            window.print();
+        }
+    </script>
+</body>
+</html>
