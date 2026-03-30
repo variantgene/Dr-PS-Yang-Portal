@@ -86,26 +86,35 @@
         }
         
         .menu-btn {
-            display: block;
+            display: flex;
+            align-items: center;
+            text-align: left;
             text-decoration: none;
             background: #fdfafb;
-            border: 1px solid #f0e6e9;
             padding: 25px;
             border-radius: 8px;
-            color: #a76b7e;
             font-size: 18px;
             font-weight: bold;
             transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(0,0,0,0.02);
             cursor: pointer;
+            border: 1px solid;
         }
-        
-        .menu-btn:hover {
-            background: #c08497;
-            color: #ffffff;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(192, 132, 151, 0.3);
-            border-color: #c08497;
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            margin-right: 20px;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-btn:hover .btn-icon {
+            transform: scale(1.1);
+        }
+
+        .btn-content {
+            flex-grow: 1;
         }
 
         .btn-subtext {
@@ -116,33 +125,39 @@
             opacity: 0.8;
         }
 
-        /* "Coming Soon" styling */
-        .menu-btn.disabled {
-            background: #f9f9f9;
-            border-color: #eee;
-            color: #aaa;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
+        /* --- THE COLOR-CODING ENGINE --- */
+        /* Female Button (Blush Pink) */
+        #btn-female {
+            color: #a76b7e;
+            border-color: #f0e6e9;
         }
-        .menu-btn.disabled:hover {
-            background: #f9f9f9;
-            color: #aaa;
-            border-color: #eee;
+        #btn-female:hover {
+            background: #c08497;
+            color: #ffffff;
+            border-color: #c08497;
+            box-shadow: 0 8px 20px rgba(192, 132, 151, 0.3);
+            transform: translateY(-3px);
         }
-        .badge {
-            display: inline-block;
-            background: #e0e0e0;
-            color: #888;
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 12px;
-            margin-left: 10px;
-            vertical-align: middle;
+
+        /* Male Button (Slate Blue) */
+        #btn-male {
+            color: #4A6B82;
+            border-color: #D1DCE3;
+            background: #fafbfc;
         }
+        #btn-male:hover {
+            background: #4A6B82;
+            color: #ffffff;
+            border-color: #4A6B82;
+            box-shadow: 0 8px 20px rgba(74, 107, 130, 0.3);
+            transform: translateY(-3px);
+        }
+        
     </style>
 </head>
-<body class="lang-en"> <div class="ipad-container">
+<body class="lang-en"> 
+
+    <div class="ipad-container">
         
         <div class="lang-switch-container">
             <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
@@ -150,16 +165,17 @@
         </div>
 
         <div class="clinical-header">
-            <img src="arts.clinic.logo.05.png" alt="Taipei Arts Plastic Clinic" class="logo-image">
+            <img src="arts.clinic.logo.05.png" alt="Taipei Arts Plastic Clinic" class="logo-image" onerror="this.style.display='none'">
             <br>
-				<div class="doctor-info">
+            <div class="doctor-info">
                 <div class="doctor-name-en">Dr. Penny Yang</div>
                 <div class="doctor-name-zh">楊佩珊醫師</div>
                 <div class="dept-info">
-                    <span class="en">Taipei Arts Plastic Clinic | Aesthetic Medicine & Urology Specialist</span>
+                    <span class="en">Taipei Arts Plastic Clinic | Aesthetic Medicine & Urology</span>
                     <span class="zh">台北亞緻整形外科醫美中心 | 醫學美容泌尿外科專科</span>
                 </div>
-            </div>        </div>
+            </div>        
+        </div>
 
         <h1>
             <span class="en">Clinical Diagnostics Portal</span>
@@ -172,23 +188,41 @@
         
         <div class="menu-grid">
             
-            <a href="fsfi-dr-yang.html" class="menu-btn">
-                <span class="en">Female Sexual Function Index (FSFI)</span>
-                <span class="zh">女性性功能指數 (FSFI) 評估量表</span>
-                <span class="btn-subtext">
-                    <span class="en">19-Question Diagnostic Assessment</span>
-                    <span class="zh">19題臨床診斷問卷</span>
-                </span>
+            <a href="fsfi-dr-yang.html" class="menu-btn" id="btn-female">
+                <div class="btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="10" r="6"></circle>
+                        <line x1="12" y1="16" x2="12" y2="22"></line>
+                        <line x1="9" y1="19" x2="15" y2="19"></line>
+                    </svg>
+                </div>
+                <div class="btn-content">
+                    <span class="en">Female Sexual Function Index (FSFI)</span>
+                    <span class="zh">女性性功能指數 (FSFI) 評估量表</span>
+                    <span class="btn-subtext">
+                        <span class="en">19-Question Diagnostic Assessment</span>
+                        <span class="zh">19題臨床診斷問卷</span>
+                    </span>
+                </div>
             </a>
 
-            <div class="menu-btn disabled">
-                <span class="en">Male Sexual Function Index (IIEF) <span class="badge">Coming Soon</span></span>
-                <span class="zh">男性性功能指數 (IIEF) 評估量表 <span class="badge">即將推出</span></span>
-                <span class="btn-subtext">
-                    <span class="en">In Development</span>
-                    <span class="zh">開發中</span>
-                </span>
-            </div>
+            <a href="IIEF5-dr-yang.html" class="menu-btn" id="btn-male">
+                <div class="btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="10" cy="14" r="6"></circle>
+                        <line x1="14.2" y1="9.8" x2="21" y2="3"></line>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                    </svg>
+                </div>
+                <div class="btn-content">
+                    <span class="en">Male Sexual Function Index (IIEF-5 +) </span>
+                    <span class="zh">男性性功能指數 (IIEF-5 +) 評估量表 </span>
+                    <span class="btn-subtext">
+                        <span class="en">21-Question Diagnostic Assessment</span>
+                        <span class="zh">21題臨床診斷問卷</span>
+                    </span>
+                </div>
+            </a>
 
         </div>
 
