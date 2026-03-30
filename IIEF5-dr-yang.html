@@ -118,9 +118,23 @@
         label.radio-block:hover, label.check-block:hover { color: var(--primary-color); }
         .simple-radio, .simple-checkbox { margin-right: 12px; display: inline-block !important; width: 18px; height: 18px;}
 
+        /* THE CLOSING BLURB */
+        .closing-blurb {
+            background: var(--primary-bg);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--primary-color);
+        }
+        .closing-blurb strong { font-size: 16px; margin-bottom: 10px; display: block;}
+
         /* BUTTONS */
         button.calc-btn {
-            width: 100%; background-color: var(--primary-color); color: white; border: none; padding: 18px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; margin-top: 20px; box-shadow: 0 4px 15px rgba(74, 107, 130, 0.3);
+            width: 100%; background-color: var(--primary-color); color: white; border: none; padding: 18px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(74, 107, 130, 0.3);
         }
         button.calc-btn:hover { background-color: var(--primary-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(74, 107, 130, 0.4);}
         
@@ -191,7 +205,7 @@
             .ipad-container { box-shadow: none !important; border-top: none !important; padding: 0 !important; max-width: 100% !important; }
 
             /* HIDE EVERYTHING EXCEPT DASHBOARD */
-            .clinical-header, h1, .subtitle, .lang-switch-container, .calc-btn, .print-btn, .edit-btn, #iief5-form { display: none !important; }
+            .clinical-header, h1, .subtitle, .lang-switch-container, .calc-btn, .print-btn, .edit-btn, #iief5-form, .closing-blurb { display: none !important; }
 
             /* FORCE DESKTOP GRID LAYOUT (PREVENTS 2-PAGE STACKING) */
             .metrics-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 15px !important; }
@@ -235,7 +249,10 @@
             <div class="doctor-info">
                 <div class="doctor-name-en">Dr. Penny Yang</div>
                 <div class="doctor-name-zh">楊佩珊醫師</div>
-                <div class="dept-info">台北亞緻整形外科醫美中心 醫學美容泌尿外科專科</div>
+                <div class="dept-info">
+                    <span class="en">Taipei Arts Plastic Clinic | Aesthetic Medicine & Urology Specialist</span>
+                    <span class="zh">台北亞緻整形外科醫美中心 | 醫學美容泌尿外科專科</span>
+                </div>
             </div>
         </div>
 
@@ -299,16 +316,20 @@
 
             <div class="domain-section">
                 <div class="domain-title"><span class="en">Part 2: Glans Sensitivity Questionnaire</span><span class="zh">第二部分：龜頭敏感度評估</span></div>
+                
                 <div class="question-block">
-                    <p class="q-text"><span class="en">1. Subjective Sensitivity: How do you rate your glans sensitivity?</span><span class="zh">1. A.主觀敏感度：您覺得龜頭敏感度如何？</span></p>
+                    <p class="q-text"><strong>A. Subjective Sensitivity | 主觀敏感度</strong></p>
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;"><span class="en">1. How do you rate your glans sensitivity?</span><span class="zh">1. 您覺得龜頭敏感度如何？</span></p>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs1" value="1"><span class="en">Very insensitive</span><span class="zh">非常不敏感</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs1" value="2"><span class="en">Somewhat insensitive</span><span class="zh">偏不敏感</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs1" value="3"><span class="en">Normal</span><span class="zh">正常</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs1" value="4"><span class="en">Somewhat sensitive</span><span class="zh">偏敏感</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs1" value="5"><span class="en">Very sensitive</span><span class="zh">非常敏感</span></label>
                 </div>
+                
                 <div class="question-block">
-                    <p class="q-text"><span class="en">2. Stimulation Response: Intensity of sensation to light touch?</span><span class="zh">2. B.刺激反應：輕微觸碰時的感覺強度？</span></p>
+                    <p class="q-text"><strong>B. Stimulation Response | 刺激反應</strong></p>
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;"><span class="en">2. Intensity of sensation to light touch?</span><span class="zh">2. 輕微觸碰時的感覺強度？</span></p>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs2" value="1"><span class="en">Almost none</span><span class="zh">幾乎無感</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs2" value="2"><span class="en">Weak</span><span class="zh">弱</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs2" value="3"><span class="en">Moderate</span><span class="zh">中等</span></label>
@@ -316,15 +337,17 @@
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs2" value="5"><span class="en">Very strong</span><span class="zh">非常強</span></label>
                 </div>
                 <div class="question-block">
-                    <p class="q-text"><span class="en">3. During sexual stimulation, does sensitivity rise too quickly?</span><span class="zh">3. 性刺激時，敏感度是否過快上升？</span></p>
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;"><span class="en">3. During sexual stimulation, does sensitivity rise too quickly?</span><span class="zh">3. 性刺激時，敏感度是否過快上升？</span></p>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs3" value="1"><span class="en">Never</span><span class="zh">完全不會</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs3" value="2"><span class="en">Occasionally</span><span class="zh">偶爾</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs3" value="3"><span class="en">Half the time</span><span class="zh">一半時間</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs3" value="4"><span class="en">Most of the time</span><span class="zh">多數時間</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs3" value="5"><span class="en">Almost always</span><span class="zh">幾乎每次</span></label>
                 </div>
+                
                 <div class="question-block">
-                    <p class="q-text"><span class="en">4. Ejaculatory Control: Do you ejaculate quickly due to glans stimulation?</span><span class="zh">4. C.射精控制：是否容易因龜頭刺激而快速射精？</span></p>
+                    <p class="q-text"><strong>C. Ejaculatory Control | 射精控制</strong></p>
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;"><span class="en">4. Do you ejaculate quickly due to glans stimulation?</span><span class="zh">4. 是否容易因龜頭刺激而快速射精？</span></p>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs4" value="1"><span class="en">Never</span><span class="zh">完全不會</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs4" value="2"><span class="en">Occasionally</span><span class="zh">偶爾</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs4" value="3"><span class="en">Half the time</span><span class="zh">一半時間</span></label>
@@ -332,15 +355,17 @@
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs4" value="5"><span class="en">Almost always</span><span class="zh">幾乎每次</span></label>
                 </div>
                 <div class="question-block">
-                    <p class="q-text"><span class="en">5. Do you need to reduce stimulation (e.g., use a condom) to last longer?</span><span class="zh">5. 您是否需要降低刺激（如使用保險套）才能延長時間？</span></p>
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;"><span class="en">5. Do you need to reduce stimulation (e.g., use a condom) to last longer?</span><span class="zh">5. 您是否需要降低刺激（如使用保險套）才能延長時間？</span></p>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs5" value="1"><span class="en">Never need</span><span class="zh">不需要</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs5" value="2"><span class="en">Occasionally</span><span class="zh">偶爾</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs5" value="3"><span class="en">Sometimes</span><span class="zh">有時</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs5" value="4"><span class="en">Often</span><span class="zh">常常</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs5" value="5"><span class="en">Always need</span><span class="zh">一定需要</span></label>
                 </div>
+                
                 <div class="question-block">
-                    <p class="q-text"><span class="en">6. Functional Impact: Does glans sensitivity impact sexual satisfaction?</span><span class="zh">6. D.功能影響：龜頭敏感度是否影響性生活滿意度？</span></p>
+                    <p class="q-text"><strong>D. Functional Impact | 功能影響</strong></p>
+                    <p style="font-size: 13px; color:#666; margin-bottom:5px;"><span class="en">6. Does glans sensitivity impact sexual satisfaction?</span><span class="zh">6. 龜頭敏感度是否影響性生活滿意度？</span></p>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs6" value="1"><span class="en">Not at all</span><span class="zh">完全沒有</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs6" value="2"><span class="en">Mildly</span><span class="zh">輕微</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio gs" name="gs6" value="3"><span class="en">Moderately</span><span class="zh">中等</span></label>
@@ -365,7 +390,7 @@
                     <p style="font-size: 13px; color:#666; margin-bottom:5px;"><span class="en">2. Partner type:</span><span class="zh">2. 性伴侶類型：</span></p>
                     <label class="radio-block"><input type="radio" class="simple-radio" name="intake_a2" value="One regular partner"> <span class="en">One regular partner</span><span class="zh">固定伴侶</span></label>
                     <label class="radio-block"><input type="radio" class="simple-radio" name="intake_a2" value="Multiple regular partners"> <span class="en">Multiple regular partners</span><span class="zh">多重伴侶</span></label>
-                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_a2" value="Casual partner(s) or none"> <span class="en">Casual partner(s) or none</span><span class="zh">無固定伴侶</span></label>
+                    <label class="radio-block"><input type="radio" class="simple-radio" name="intake_a2" value="Casual partner(s) or none"> <span class="en">Casual partner(s) / No regular partner</span><span class="zh">無固定伴侶</span></label>
                 </div>
                 <div class="question-block">
                     <p style="font-size: 13px; color:#666; margin-bottom:5px;"><span class="en">3. Sexual practices (Select all that apply):</span><span class="zh">3. 性行為型態（可複選）：</span></p>
@@ -456,6 +481,12 @@
                     <label class="check-block"><input type="checkbox" class="simple-checkbox goal-check" value="Libido"> <span class="en">Libido / Desire</span><span class="zh">性慾</span></label>
                     <label class="check-block"><input type="checkbox" class="simple-checkbox goal-check" value="Appearance"> <span class="en">Appearance (Size/Glans)</span><span class="zh">外觀（尺寸/龜頭）</span></label>
                 </div>
+            </div>
+            
+            <div class="closing-blurb">
+                <strong><span class="en">Thank you for your trust and candor.</span><span class="zh">感謝您的信任與坦誠。</span></strong>
+                <span class="en">True male sexual health is not just about improving physical function, but also about elevating confidence and overall quality of life.<br>Based on your responses, we will design a personalized assessment and treatment plan, ensuring every step is precise and reassuring.<br>Your privacy and comfort remain our utmost priority.</span>
+                <span class="zh">真正的男性健康，不只是功能的改善，更是自信與生活品質的提升。<br>我們將根據您的回覆，為您規劃專屬的評估與治療建議，讓每一步都更精準、更安心。<br>您的隱私與感受，始終是我們最重視的核心。</span>
             </div>
 
             <button type="button" class="calc-btn" onclick="executeDashboardLogic()">
@@ -708,8 +739,8 @@
             // New Triage Logic for Section B (Erection Trouble)
             let b4 = document.querySelector(`input[name="intake_b4"]:checked`);
             let b5 = document.querySelector(`input[name="intake_b5"]:checked`);
-            if (b4 && b4.value.includes('Often')) flags.push(isZh ? '經常勃起困難' : 'Frequent ED');
-            if (b5 && b5.value.includes('No')) flags.push(isZh ? '勃起時間不足' : 'Insufficient Erection Time');
+            if (b4 && b4.value === 'Often') flags.push(isZh ? '經常勃起困難' : 'Frequent ED');
+            if (b5 && b5.value === 'No') flags.push(isZh ? '勃起時間不足' : 'Insufficient Erection Time');
 
             // Exercise check
             let exerciseBox = document.querySelector('input.life-check[value="Exercise"]');
